@@ -1,10 +1,12 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 
 def test_index_redirects_to_today(client):
     r = client.get("/")
     assert r.status_code == 302
-    assert date.today().isoformat() in r.headers["Location"]
+    madrid_today = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
+    assert madrid_today in r.headers["Location"]
 
 
 def test_health(client):
