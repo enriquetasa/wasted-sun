@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 17:05+0100\n"
+"POT-Creation-Date: 2026-03-23 17:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,38 +17,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:86
+#: wasted_sun/views.py:85
 msgid "Invalid date."
 msgstr ""
 
-#: wasted_sun/views.py:90
+#: wasted_sun/views.py:89
 msgid "No data for future dates."
 msgstr ""
 
-#: wasted_sun/views.py:97
+#: wasted_sun/views.py:96
 msgid "Invalid database configuration. Check environment variables."
 msgstr ""
 
-#: wasted_sun/views.py:103
+#: wasted_sun/views.py:102
 msgid "No energy data loaded yet."
 msgstr ""
 
-#: wasted_sun/views.py:105
+#: wasted_sun/views.py:104
 msgid "No data before coverage starts."
 msgstr ""
 
-#: wasted_sun/views.py:110
+#: wasted_sun/views.py:109
 msgid "No data for this date."
 msgstr ""
 
-#: wasted_sun/views.py:123
+#: wasted_sun/views.py:122
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative "
 "~%(day_eur)s (site €/MWh). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
 msgstr ""
 
-#: wasted_sun/views.py:135
+#: wasted_sun/views.py:134
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
@@ -56,7 +56,7 @@ msgid ""
 msgstr ""
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
-#: wasted_sun/templates/day.html:2
+#: wasted_sun/templates/day.html:2 wasted_sun/templates/error.html:2
 msgid "Wasted Sun"
 msgstr ""
 
@@ -332,7 +332,11 @@ msgstr ""
 msgid "Unused solar (MWh)"
 msgstr ""
 
-#: wasted_sun/templates/error.html:4
+#: wasted_sun/templates/error.html:2
+msgid "Error"
+msgstr ""
+
+#: wasted_sun/templates/error.html:5
 msgid "Back to today"
 msgstr ""
 
