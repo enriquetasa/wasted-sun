@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wasted-sun 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-23 17:05+0100\n"
+"POT-Creation-Date: 2026-03-23 17:21+0100\n"
 "PO-Revision-Date: 2026-03-23 15:30+0100\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -16,41 +16,41 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:86
+#: wasted_sun/views.py:85
 msgid "Invalid date."
 msgstr "Fecha no válida."
 
-#: wasted_sun/views.py:90
+#: wasted_sun/views.py:89
 msgid "No data for future dates."
 msgstr "No hay datos para fechas futuras."
 
-#: wasted_sun/views.py:97
+#: wasted_sun/views.py:96
 msgid "Invalid database configuration. Check environment variables."
 msgstr "Configuración de base de datos no válida. Revisa las variables de entorno."
 
-#: wasted_sun/views.py:103
+#: wasted_sun/views.py:102
 msgid "No energy data loaded yet."
 msgstr "Aún no hay datos de energía cargados."
 
-#: wasted_sun/views.py:105
+#: wasted_sun/views.py:104
 msgid "No data before coverage starts."
 msgstr "No hay datos anteriores al inicio de la serie."
 
-#: wasted_sun/views.py:110
+#: wasted_sun/views.py:109
 msgid "No data for this date."
 msgstr "No hay datos para esta fecha."
 
-#: wasted_sun/views.py:123
+#: wasted_sun/views.py:122
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative "
 "~%(day_eur)s (site €/MWh). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
 msgstr ""
 "%(day)s — %(day_mwh)s solar no utilizado (península); ~%(day_eur)s "
-"ilustrativo (€/MWh del sitio). ~%(eur_h)s/h de media. Acumulado: "
-"%(ytd)s. %(url)s"
+"ilustrativo (€/MWh del sitio). ~%(eur_h)s/h de media. Acumulado: %(ytd)s."
+" %(url)s"
 
-#: wasted_sun/views.py:135
+#: wasted_sun/views.py:134
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
@@ -60,7 +60,7 @@ msgstr ""
 "media. Acumulado: %(ytd)s. %(url)s"
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
-#: wasted_sun/templates/day.html:2
+#: wasted_sun/templates/day.html:2 wasted_sun/templates/error.html:2
 msgid "Wasted Sun"
 msgstr "Sol desperdiciado"
 
@@ -102,8 +102,7 @@ msgstr "Total del día"
 
 #: wasted_sun/templates/day.html:29
 msgid "Solar output the system could not use that day—measured in MWh."
-msgstr ""
-"Producción solar que el sistema no pudo integrar ese día—medida en MWh."
+msgstr "Producción solar que el sistema no pudo integrar ese día—medida en MWh."
 
 #: wasted_sun/templates/day.html:33
 msgid "Illustrative € equivalent"
@@ -114,8 +113,8 @@ msgid ""
 "This site’s €/MWh × unused MWh—not a bill or market price, but a serious "
 "order of magnitude."
 msgstr ""
-"€/MWh del sitio × MWh no aprovechados—no es factura ni precio de mercado, "
-"sí un orden de magnitud serio."
+"€/MWh del sitio × MWh no aprovechados—no es factura ni precio de mercado,"
+" sí un orden de magnitud serio."
 
 #: wasted_sun/templates/day.html:44
 #, python-format
@@ -237,8 +236,8 @@ msgid ""
 msgstr ""
 "\n"
 "    El total de solar no utilizado hoy ronda el consumo diario de unas\n"
-"    <strong>%(homes)s</strong> viviendas típicas, con un valor ilustrativo "
-"de %(kwh)s kWh por hogar y día\n"
+"    <strong>%(homes)s</strong> viviendas típicas, con un valor "
+"ilustrativo de %(kwh)s kWh por hogar y día\n"
 "    para dar escala (no es un censo; ver metodología).\n"
 "    "
 
@@ -305,8 +304,8 @@ msgstr ""
 "\n"
 "    Los importes en euros solo aparecen si WASTED_SUN_EUR_PER_MWH está "
 "definido; aplican un tipo ilustrativo\n"
-"    simple × energía, no un cierre de mercado—pero dejan claro que los MWh "
-"no aprovechados no son neutrales en coste.\n"
+"    simple × energía, no un cierre de mercado—pero dejan claro que los "
+"MWh no aprovechados no son neutrales en coste.\n"
 "    "
 
 #: wasted_sun/templates/day.html:157
@@ -373,8 +372,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Creé Wasted Sun como particular para dejar el solar no utilizado a la "
-"vista. No es un producto, sitio web\n"
+"    Creé Wasted Sun como particular para dejar el solar no utilizado a la"
+" vista. No es un producto, sitio web\n"
 "    ni comunicación oficial de Octopus Energy.\n"
 "    "
 
@@ -425,7 +424,11 @@ msgstr ""
 msgid "Unused solar (MWh)"
 msgstr "Solar no utilizado (MWh)"
 
-#: wasted_sun/templates/error.html:4
+#: wasted_sun/templates/error.html:2
+msgid "Error"
+msgstr "Error"
+
+#: wasted_sun/templates/error.html:5
 msgid "Back to today"
 msgstr "Volver a hoy"
 
