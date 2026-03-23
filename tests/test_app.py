@@ -59,3 +59,35 @@ def test_set_locale_rejects_open_redirect(client):
         assert r.status_code == 302
         assert "evil" not in r.headers["Location"]
         assert "javascript" not in r.headers["Location"]
+
+
+def test_invalid_date_string_404(client):
+    r = client.get("/not-a-date/")
+    assert r.status_code == 404
+
+
+def test_date_before_earliest_404(client):
+    r = client.get("/2020-01-01/")
+    assert r.status_code == 404
+
+
+def test_error_page_has_back_link(client):
+    r = client.get("/not-a-date/")
+    assert r.status_code == 404
+    assert b"Back to today" in r.data or b"Volver a hoy" in r.data
+
+
+def test_lang_query_param_switches_locale(client):
+    d = date(2024, 6, 15)
+    r = client.get(f"/{d.isoformat()}/?lang=en")
+    assert r.status_code == 200
+    assert b"Wasted Sun" in r.data
+
+    r = client.get(f"/{d.isoformat()}/?lang=es")
+    assert r.status_code == 200
+    assert b"Sol desperdiciado" in r.data
+
+
+def test_set_locale_invalid_lang_redirects(client):
+    r = client.get("/set-locale/fr/", follow_redirects=False)
+    assert r.status_code == 302
