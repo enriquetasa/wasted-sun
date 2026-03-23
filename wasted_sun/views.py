@@ -120,8 +120,8 @@ def day_view(day_str: str):
     show_eur = _show_eur()
     if show_eur:
         share_text = _(
-            "Spain (peninsula) unused solar %(day)s: %(day_mwh)s "
-            "(%(day_eur)s illustrative) — %(eur_h)s/h on average. "
+            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); "
+            "~%(day_eur)s at site €/MWh. ~%(eur_h)s/h avg. "
             "YTD: %(ytd)s. %(url)s"
         ) % {
             "day": day.isoformat(),
@@ -133,8 +133,8 @@ def day_view(day_str: str):
         }
     else:
         share_text = _(
-            "Spain (peninsula) unused solar %(day)s: %(day_mwh)s "
-            "— %(mwh_h)s/h on average. YTD: %(ytd)s MWh. %(url)s"
+            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). "
+            "~%(mwh_h)s/h avg. YTD: %(ytd)s. %(url)s"
         ) % {
             "day": day.isoformat(),
             "day_mwh": fmt_mwh(metrics.day_total_mwh),

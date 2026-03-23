@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 16:39+0100\n"
+"POT-Creation-Date: 2026-03-23 16:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,15 +44,15 @@ msgstr ""
 #: wasted_sun/views.py:123
 #, python-format
 msgid ""
-"Spain (peninsula) unused solar %(day)s: %(day_mwh)s (%(day_eur)s "
-"illustrative) — %(eur_h)s/h on average. YTD: %(ytd)s. %(url)s"
+"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s at "
+"site €/MWh. ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
 msgstr ""
 
 #: wasted_sun/views.py:136
 #, python-format
 msgid ""
-"Spain (peninsula) unused solar %(day)s: %(day_mwh)s — %(mwh_h)s/h on "
-"average. YTD: %(ytd)s MWh. %(url)s"
+"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
+" YTD: %(ytd)s. %(url)s"
 msgstr ""
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
@@ -89,7 +89,7 @@ msgid "Today"
 msgstr ""
 
 #: wasted_sun/templates/day.html:21
-msgid "Unused solar on the Spanish peninsula"
+msgid "Solar going unused on the Spanish peninsula"
 msgstr ""
 
 #: wasted_sun/templates/day.html:24
@@ -97,22 +97,22 @@ msgid "This day’s total"
 msgstr ""
 
 #: wasted_sun/templates/day.html:29
-msgid "Unused solar electricity"
+msgid "Solar output the grid could not use that day"
 msgstr ""
 
 #: wasted_sun/templates/day.html:33
-msgid "Illustrative cost"
+msgid "Illustrative € equivalent"
 msgstr ""
 
 #: wasted_sun/templates/day.html:38
-msgid "At your configured €/MWh rate (not a market bill)"
+msgid "Uses this site’s €/MWh setting × MWh—not a market price or your bill."
 msgstr ""
 
 #: wasted_sun/templates/day.html:44
 #, python-format
 msgid ""
 "\n"
-"    About %(eur_h)s per hour on average over the day (%(mwh_h)s).\n"
+"    Averaging about %(eur_h)s per hour for this day (%(mwh_h)s).\n"
 "    "
 msgstr ""
 
@@ -120,7 +120,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"    About %(mwh_h)s per hour on average over the day.\n"
+"    Averaging about %(mwh_h)s per hour for this day.\n"
 "    "
 msgstr ""
 
@@ -129,11 +129,11 @@ msgid "So far this year:"
 msgstr ""
 
 #: wasted_sun/templates/day.html:62
-msgid "in estimated waste."
+msgid "at that illustrative €/MWh rate."
 msgstr ""
 
 #: wasted_sun/templates/day.html:68
-msgid "cumulative this year."
+msgid "in total."
 msgstr ""
 
 #: wasted_sun/templates/day.html:71

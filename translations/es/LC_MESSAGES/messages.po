@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wasted-sun 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-23 16:39+0100\n"
+"POT-Creation-Date: 2026-03-23 16:50+0100\n"
 "PO-Revision-Date: 2026-03-23 15:30+0100\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -43,21 +43,20 @@ msgstr "No hay datos para esta fecha."
 #: wasted_sun/views.py:123
 #, python-format
 msgid ""
-"Spain (peninsula) unused solar %(day)s: %(day_mwh)s (%(day_eur)s "
-"illustrative) — %(eur_h)s/h on average. YTD: %(ytd)s. %(url)s"
+"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s at "
+"site €/MWh. ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
 msgstr ""
-"España (península), energía solar no utilizada %(day)s: %(day_mwh)s "
-"(%(day_eur)s ilustrativo) — %(eur_h)s/h de media. Acumulado del año: "
-"%(ytd)s. %(url)s"
+"%(day)s — %(day_mwh)s solar sin aprovechar (península); ~%(day_eur)s al "
+"€/MWh del sitio. ~%(eur_h)s/h de media. Acumulado: %(ytd)s. %(url)s"
 
 #: wasted_sun/views.py:136
 #, python-format
 msgid ""
-"Spain (peninsula) unused solar %(day)s: %(day_mwh)s — %(mwh_h)s/h on "
-"average. YTD: %(ytd)s MWh. %(url)s"
+"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
+" YTD: %(ytd)s. %(url)s"
 msgstr ""
-"España (península), energía solar no utilizada %(day)s: %(day_mwh)s — "
-"%(mwh_h)s/h de media. Acumulado del año: %(ytd)s MWh. %(url)s"
+"%(day)s — %(day_mwh)s solar sin aprovechar (península). ~%(mwh_h)s/h de "
+"media. Acumulado: %(ytd)s. %(url)s"
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
 #: wasted_sun/templates/day.html:2
@@ -93,45 +92,47 @@ msgid "Today"
 msgstr "Hoy"
 
 #: wasted_sun/templates/day.html:21
-msgid "Unused solar on the Spanish peninsula"
-msgstr "Energía solar no aprovechada en el territorio peninsular Español"
+msgid "Solar going unused on the Spanish peninsula"
+msgstr "Solar sin aprovechar en la península española"
 
 #: wasted_sun/templates/day.html:24
 msgid "This day’s total"
 msgstr "Total del día"
 
 #: wasted_sun/templates/day.html:29
-msgid "Unused solar electricity"
-msgstr "Electricidad solar no utilizada"
+msgid "Solar output the grid could not use that day"
+msgstr "Producción solar que la red no pudo integrar ese día"
 
 #: wasted_sun/templates/day.html:33
-msgid "Illustrative cost"
-msgstr "Coste ilustrativo"
+msgid "Illustrative € equivalent"
+msgstr "Equivalente en € (orientativo)"
 
 #: wasted_sun/templates/day.html:38
-msgid "At your configured €/MWh rate (not a market bill)"
-msgstr "Según el €/MWh configurado (no es una factura de mercado)"
+msgid "Uses this site’s €/MWh setting × MWh—not a market price or your bill."
+msgstr ""
+"Multiplica el €/MWh configurado en el sitio por los MWh: no es precio de "
+"mercado ni tu factura."
 
 #: wasted_sun/templates/day.html:44
 #, python-format
 msgid ""
 "\n"
-"    About %(eur_h)s per hour on average over the day (%(mwh_h)s).\n"
+"    Averaging about %(eur_h)s per hour for this day (%(mwh_h)s).\n"
 "    "
 msgstr ""
 "\n"
-"    Unos %(eur_h)s por hora de media a lo largo del día (%(mwh_h)s).\n"
+"    Unos %(eur_h)s de media por hora este día (%(mwh_h)s).\n"
 "    "
 
 #: wasted_sun/templates/day.html:50
 #, python-format
 msgid ""
 "\n"
-"    About %(mwh_h)s per hour on average over the day.\n"
+"    Averaging about %(mwh_h)s per hour for this day.\n"
 "    "
 msgstr ""
 "\n"
-"    Unos %(mwh_h)s por hora de media a lo largo del día.\n"
+"    Unos %(mwh_h)s de media por hora este día.\n"
 "    "
 
 #: wasted_sun/templates/day.html:56
@@ -139,12 +140,12 @@ msgid "So far this year:"
 msgstr "Lo que llevamos de año:"
 
 #: wasted_sun/templates/day.html:62
-msgid "in estimated waste."
-msgstr "de desperdicio estimado."
+msgid "at that illustrative €/MWh rate."
+msgstr "a ese €/MWh orientativo."
 
 #: wasted_sun/templates/day.html:68
-msgid "cumulative this year."
-msgstr "acumulados este año."
+msgid "in total."
+msgstr "en total."
 
 #: wasted_sun/templates/day.html:71
 #, python-format
@@ -553,4 +554,26 @@ msgstr "Volver a hoy"
 #~ "electricidad solar malgastada para este "
 #~ "día natural.\n"
 #~ "    "
+
+#~ msgid ""
+#~ "Spain (peninsula) unused solar %(day)s: "
+#~ "%(day_mwh)s — %(mwh_h)s/h on average. "
+#~ "YTD: %(ytd)s MWh. %(url)s"
+#~ msgstr ""
+#~ "España (península), energía solar no "
+#~ "utilizada %(day)s: %(day_mwh)s — %(mwh_h)s/h"
+#~ " de media. Acumulado del año: %(ytd)s"
+#~ " MWh. %(url)s"
+
+#~ msgid "Unused solar electricity"
+#~ msgstr "Electricidad solar no utilizada"
+
+#~ msgid "At your configured €/MWh rate (not a market bill)"
+#~ msgstr "Según el €/MWh configurado (no es una factura de mercado)"
+
+#~ msgid "in estimated waste."
+#~ msgstr "de desperdicio estimado."
+
+#~ msgid "cumulative this year."
+#~ msgstr "acumulados este año."
 

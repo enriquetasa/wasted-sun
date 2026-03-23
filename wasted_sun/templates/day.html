@@ -18,7 +18,7 @@
 </nav>
 
 <section class="kpi-hero" aria-labelledby="kpi-headline">
-  <h2 id="kpi-headline" class="kpi-hero__title">{% trans %}Unused solar on the Spanish peninsula{% endtrans %}</h2>
+  <h2 id="kpi-headline" class="kpi-hero__title">{% trans %}Solar going unused on the Spanish peninsula{% endtrans %}</h2>
   <div class="kpi-hero__deck">
     <article class="kpi-card kpi-card--energy">
       <h3 class="kpi-card__label">{% trans %}This day’s total{% endtrans %}</h3>
@@ -26,29 +26,29 @@
         <span class="no-js-only">{{ fmt_mwh(metrics.day_total_mwh) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_mwh }}" data-final="{{ fmt_mwh(metrics.day_total_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}Unused solar electricity{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}Solar output the grid could not use that day{% endtrans %}</p>
     </article>
     {% if show_eur %}
     <article class="kpi-card kpi-card--money">
-      <h3 class="kpi-card__label">{% trans %}Illustrative cost{% endtrans %}</h3>
+      <h3 class="kpi-card__label">{% trans %}Illustrative € equivalent{% endtrans %}</h3>
       <p class="kpi-card__value">
         <span class="no-js-only">{{ fmt_eur(metrics.day_total_eur) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_eur }}" data-final="{{ fmt_eur(metrics.day_total_eur) }}" data-kind="eur">{{ zero_eur }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}At your configured €/MWh rate (not a market bill){% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}Uses this site’s €/MWh setting × MWh—not a market price or your bill.{% endtrans %}</p>
     </article>
     {% endif %}
   </div>
   {% if show_eur %}
   <p class="kpi-hero__secondary">
     {% trans eur_h=fmt_eur(metrics.mean_hourly_eur), mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    About {{ eur_h }} per hour on average over the day ({{ mwh_h }}).
+    Averaging about {{ eur_h }} per hour for this day ({{ mwh_h }}).
     {% endtrans %}
   </p>
   {% else %}
   <p class="kpi-hero__secondary">
     {% trans mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    About {{ mwh_h }} per hour on average over the day.
+    Averaging about {{ mwh_h }} per hour for this day.
     {% endtrans %}
   </p>
   {% endif %}
@@ -59,13 +59,13 @@
       <span class="no-js-only">{{ fmt_eur(metrics.ytd_eur) }}</span>
       <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_eur }}" data-final="{{ fmt_eur(metrics.ytd_eur) }}" data-kind="eur">{{ zero_eur }}</span>
     </span>
-    {% trans %}in estimated waste.{% endtrans %}
+    {% trans %}at that illustrative €/MWh rate.{% endtrans %}
     {% else %}
     <span class="kpi-ytd-anim">
       <span class="no-js-only">{{ fmt_mwh(metrics.ytd_mwh) }}</span>
       <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_mwh }}" data-final="{{ fmt_mwh(metrics.ytd_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
     </span>
-    {% trans %}cumulative this year.{% endtrans %}
+    {% trans %}in total.{% endtrans %}
     {% endif %}
   </p>
   <p class="meta-asof">{% trans ts=metrics.as_of.strftime('%Y-%m-%d %H:%M %Z') %}Data as of {{ ts }}{% endtrans %}</p>

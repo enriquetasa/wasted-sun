@@ -167,12 +167,23 @@ html.no-js .js-only {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
+  align-items: start;
 }
 
 @media (min-width: 36rem) {
   .kpi-hero__deck {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.15rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(36%, 15rem));
+    gap: 1.25rem;
+    justify-content: center;
+    max-width: 44rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 48rem) {
+  .kpi-hero__deck {
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(34%, 16rem));
   }
 }
 
@@ -242,8 +253,26 @@ html.no-js .js-only {
   min-height: 1.12em;
 }
 
+.kpi-card--money {
+  padding: 1.25rem 1.1rem 1.15rem;
+}
+
+.kpi-card--money .kpi-card__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+
 .kpi-card--money .kpi-card__value {
   color: #a16207;
+  font-size: clamp(1.65rem, 4.2vw, 2.45rem);
+  line-height: 1.1;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.kpi-card--money .kpi-card__hint {
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .kpi-card__hint {
