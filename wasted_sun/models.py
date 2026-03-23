@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Sequence
 
 
 @dataclass(frozen=True)
@@ -29,15 +28,6 @@ class DailyMetrics:
     mean_hourly_eur: Decimal
     as_of: datetime
     earliest_available_date: date
-
-    def hours_count(self) -> int:
-        return len(self.hourly)
-
-
-def aggregate_hourly(hourly: Sequence[HourlyPoint]) -> tuple[Decimal, Decimal]:
-    total_mwh = sum((h.mwh_unused for h in hourly), start=Decimal("0"))
-    total_eur = sum((h.eur_waste for h in hourly), start=Decimal("0"))
-    return total_mwh, total_eur
 
 
 def mean_hourly_from_totals(total_mwh: Decimal, total_eur: Decimal, n_hours: int) -> tuple[Decimal, Decimal]:
