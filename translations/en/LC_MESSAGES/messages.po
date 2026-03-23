@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 17:21+0100\n"
+"POT-Creation-Date: 2026-03-23 17:41+0100\n"
 "PO-Revision-Date: 2026-03-23 15:06+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -34,22 +34,26 @@ msgstr ""
 msgid "No energy data loaded yet."
 msgstr ""
 
-#: wasted_sun/views.py:104
+#: wasted_sun/views.py:105 wasted_sun/views.py:115
+msgid "Database temporarily unavailable."
+msgstr ""
+
+#: wasted_sun/views.py:107
 msgid "No data before coverage starts."
 msgstr ""
 
-#: wasted_sun/views.py:109
+#: wasted_sun/views.py:112
 msgid "No data for this date."
 msgstr ""
 
-#: wasted_sun/views.py:122
+#: wasted_sun/views.py:128
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative "
 "~%(day_eur)s (site €/MWh). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
 msgstr ""
 
-#: wasted_sun/views.py:134
+#: wasted_sun/views.py:140
 #, python-format
 msgid ""
 "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
