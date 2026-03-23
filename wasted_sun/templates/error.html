@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="error-box" role="alert">{{ message }}</div>
+<p><a href="{{ url_for('main.index') }}">{% trans %}Back to today{% endtrans %}</a></p>
+{% endblock %}

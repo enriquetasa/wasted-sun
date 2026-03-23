@@ -42,6 +42,9 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     USE_MOCK_DATA = _bool("USE_MOCK_DATA", default=False)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
 
 
 def get_config():

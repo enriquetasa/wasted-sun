@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale()|string|replace('_', '-') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% trans %}Wasted Sun{% endtrans %}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% if plausible_domain %}
+  <script defer data-domain="{{ plausible_domain }}" src="{{ plausible_script_url }}"></script>
+  {% endif %}
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <a href="{{ url_for('main.index') }}" class="brand">{% trans %}Wasted Sun{% endtrans %}</a>
+      <nav class="lang-switch" aria-label="{% trans %}Language{% endtrans %}">
+        {% set loc = get_locale() %}
+        <a href="{{ url_for('main.set_locale', lang='es', next=request.path) }}" class="{{ 'active' if loc == 'es' else '' }}">ES</a>
+        <a href="{{ url_for('main.set_locale', lang='en', next=request.path) }}" class="{{ 'active' if loc == 'en' else '' }}">EN</a>
+      </nav>
+    </header>
+    {% block body %}{% endblock %}
+  </div>
+</body>
+</html>
