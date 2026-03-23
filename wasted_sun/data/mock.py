@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 from wasted_sun.models import DailyMetrics, DayNotFoundError, mean_hourly_from_totals
@@ -12,6 +13,38 @@ from wasted_sun.timeseries import QH_SLOTS, qh_series_to_hourly_points
 def _pseudo_unit_interval(seed: bytes) -> float:
     h = hashlib.sha256(seed).digest()
     return int.from_bytes(h[:8], "big") / float(2**64)
+
+
+@lru_cache(maxsize=64)
+def _cached_ytd(
+    year: int,
+    end: date,
+    earliest: date,
+    tz: ZoneInfo,
+    eur_per_mwh: Decimal | None,
+    qh_slots: int,
+) -> tuple[Decimal, Decimal]:
+    """Accumulate mock YTD totals; cached because the loop is O(days-in-year)."""
+    d = date(year, 1, 1)
+    if d < earliest:
+        d = earliest
+    total_mwh = Decimal("0")
+    total_eur = Decimal("0")
+    while d <= end:
+        seed = f"wasted-sun-mock-{d.isoformat()}".encode()
+        qh: list[Decimal] = []
+        for i in range(qh_slots):
+            hour_float = (i * 15) / 60.0
+            s = seed + f"-qh{i}".encode()
+            u1 = _pseudo_unit_interval(s)
+            hour_angle = abs(hour_float - 13.5) / 13.5
+            shape = max(0.0, 1.0 - hour_angle**1.3)
+            qh.append(Decimal(str(round((0.012 + 0.09 * shape) * (0.5 + u1), 5))))
+        _, dm, de = qh_series_to_hourly_points(d, qh, tz, eur_per_mwh, n_slots=qh_slots)
+        total_mwh += dm
+        total_eur += de
+        d += timedelta(days=1)
+    return total_mwh, total_eur
 
 
 class MockMetricsProvider:
@@ -54,19 +87,12 @@ class MockMetricsProvider:
         return qh
 
     def _ytd_totals(self, through: date) -> tuple[Decimal, Decimal]:
-        d = date(through.year, 1, 1)
-        total_mwh = Decimal("0")
-        total_eur = Decimal("0")
         today = datetime.now(self._tz).date()
-        while d <= through and d <= today and d >= self._earliest:
-            qh = self._qh_for_day(d)
-            _, dm, de = qh_series_to_hourly_points(
-                d, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
-            )
-            total_mwh += dm
-            total_eur += de
-            d += timedelta(days=1)
-        return total_mwh, total_eur
+        end = min(through, today)
+        return _cached_ytd(
+            through.year, end, self._earliest,
+            self._tz, self._eur_per_mwh, self._qh_slots,
+        )
 
     def get_daily_metrics(self, day: date) -> DailyMetrics:
         qh = self._qh_for_day(day)
