@@ -26,7 +26,10 @@ def get_provider(app: Flask):
     use_mock = cfg.get("USE_MOCK_DATA")
     dsn = cfg.get("DATABASE_URL")
     eur = cfg.get("EUR_PER_MWH")
-    qh_slots = int(cfg.get("PG_QH_SLOTS", 100))
+    try:
+        qh_slots = int(cfg.get("PG_QH_SLOTS", 100))
+    except (ValueError, TypeError) as e:
+        raise ConfigurationError(f"PG_QH_SLOTS must be an integer: {e}") from e
     if use_mock or not dsn:
         return MockMetricsProvider(
             timezone=cfg["TIMEZONE"],
@@ -46,5 +49,5 @@ def get_provider(app: Flask):
             eur_per_mwh=eur,
             qh_slots=qh_slots,
         )
-    except ValueError as e:
+    except (ValueError, KeyError) as e:
         raise ConfigurationError(str(e)) from e
