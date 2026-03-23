@@ -42,7 +42,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     USE_MOCK_DATA = _bool("USE_MOCK_DATA", default=False)
-    SESSION_COOKIE_SECURE = True
+    # False for local docker over http:// — locale cookie will not persist over HTTPS-only flag
+    SESSION_COOKIE_SECURE = _bool("SESSION_COOKIE_SECURE", default=True)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 

@@ -89,7 +89,10 @@ def day_view(day_str: str):
         return render_template("error.html", message=_("No data for future dates.")), 404
 
     prov = _provider()
-    earliest = prov.earliest_date()
+    try:
+        earliest = prov.earliest_date()
+    except RuntimeError:
+        return render_template("error.html", message=_("No energy data loaded yet.")), 503
     if day < earliest:
         return render_template("error.html", message=_("No data before coverage starts.")), 404
 

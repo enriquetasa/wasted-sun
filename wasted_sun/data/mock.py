@@ -17,9 +17,15 @@ def _pseudo_unit_interval(seed: bytes) -> float:
 class MockMetricsProvider:
     """Deterministic quarter-hourly fixtures rolled up to hourly chart bars."""
 
-    def __init__(self, timezone: ZoneInfo, eur_per_mwh: Decimal | None) -> None:
+    def __init__(
+        self,
+        timezone: ZoneInfo,
+        eur_per_mwh: Decimal | None,
+        qh_slots: int = QH_SLOTS,
+    ) -> None:
         self._tz = timezone
         self._eur_per_mwh = eur_per_mwh
+        self._qh_slots = qh_slots
         self._earliest = date(2024, 1, 1)
 
     def earliest_date(self) -> date:
@@ -36,7 +42,7 @@ class MockMetricsProvider:
             raise DayNotFoundError(day)
 
         qh: list[Decimal] = []
-        for i in range(QH_SLOTS):
+        for i in range(self._qh_slots):
             slot_minutes = i * 15
             hour_float = slot_minutes / 60.0
             seed = self._day_seed(day) + f"-qh{i}".encode()
@@ -54,7 +60,9 @@ class MockMetricsProvider:
         today = datetime.now(self._tz).date()
         while d <= through and d <= today and d >= self._earliest:
             qh = self._qh_for_day(d)
-            _, dm, de = qh_series_to_hourly_points(d, qh, self._tz, self._eur_per_mwh)
+            _, dm, de = qh_series_to_hourly_points(
+                d, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
+            )
             total_mwh += dm
             total_eur += de
             d += timedelta(days=1)
@@ -63,7 +71,7 @@ class MockMetricsProvider:
     def get_daily_metrics(self, day: date) -> DailyMetrics:
         qh = self._qh_for_day(day)
         hourly, day_mwh, day_eur = qh_series_to_hourly_points(
-            day, qh, self._tz, self._eur_per_mwh
+            day, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
         )
         n = len(hourly)
         mean_mwh, mean_eur = mean_hourly_from_totals(day_mwh, day_eur, n)

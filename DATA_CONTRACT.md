@@ -19,7 +19,9 @@ Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restri
 3. **Chart:** Quarter-hours are rolled into **24 hourly** bars: qh 1–4 → hour 0, 5–8 → hour 1, …, 93–96 → hour 23. Values in **qh_97–qh_100** (if present) are **added to hour 23** so the full day’s energy appears in the profile.
 4. **Headline “per hour”:** Mean of those 24 hourly bar values (= day total MWh ÷ 24).
 5. **YTD:** `SELECT COALESCE(SUM(total_mwh),0) … WHERE date_day BETWEEN Jan-1 AND selected_day`.
-6. **Euros:** Not stored in this schema. Set **`WASTED_SUN_EUR_PER_MWH`** to show illustrative EUR (day, YTD, and share text). Omit it in production for MWh-only mode (mock mode still defaults to a demo rate unless you set the var to empty and… see README; mock uses a default rate when unset).
+6. **Euros:** Not stored in this schema. Set **`WASTED_SUN_EUR_PER_MWH`** to show illustrative EUR (day, YTD, share text). Omit it (or set to **`0`**) for MWh-only. **Mock / no `DATABASE_URL`:** if the variable is **unset**, the app applies a **default demo rate** (`52` €/MWh) so local UI still shows euros; set **`WASTED_SUN_EUR_PER_MWH=0`** to force MWh-only locally.
+
+7. **Day total vs YTD:** The **headline day total** is the **sum of merged `qh_*`**. **YTD** is **`SUM(total_mwh)`** in SQL. If those disagree in your source data, KPIs will look inconsistent—fix upstream or align columns.
 
 ## `as_of` timestamp
 

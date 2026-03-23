@@ -25,8 +25,13 @@ def get_provider(app: Flask):
     use_mock = cfg.get("USE_MOCK_DATA")
     dsn = cfg.get("DATABASE_URL")
     eur = cfg.get("EUR_PER_MWH")
+    qh_slots = int(cfg.get("PG_QH_SLOTS", 100))
     if use_mock or not dsn:
-        return MockMetricsProvider(timezone=cfg["TIMEZONE"], eur_per_mwh=eur)
+        return MockMetricsProvider(
+            timezone=cfg["TIMEZONE"],
+            eur_per_mwh=eur,
+            qh_slots=qh_slots,
+        )
     return PostgresMetricsProvider(
         dsn=dsn,
         timezone=cfg["TIMEZONE"],
@@ -35,5 +40,5 @@ def get_provider(app: Flask):
         total_mwh_col=cfg["PG_COL_TOTAL_MWH"],
         as_of_query=cfg.get("PG_AS_OF_QUERY") or None,
         eur_per_mwh=eur,
-        qh_slots=int(cfg.get("PG_QH_SLOTS", 100)),
+        qh_slots=qh_slots,
     )

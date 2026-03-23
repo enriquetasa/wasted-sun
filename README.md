@@ -38,15 +38,27 @@ pybabel update -i messages.pot -d translations
 pybabel compile -d translations
 ```
 
+## Install note
+
+Runtime dependencies are listed in **`requirements.txt`** and duplicated in **`pyproject.toml`** so `pip install .` / Docker installs a working app. For development, use **`pip install -r requirements-dev.txt`** (or `pip install -e ".[dev]"`).
+
 ## Docker / App Platform
 
 Build and run:
 
 ```bash
 docker build -t wasted-sun .
-docker run --rm -p 8080:8080 -e SECRET_KEY=dev -e BASE_URL=http://localhost:8080 wasted-sun
+docker run --rm -p 8080:8080 \
+  -e SECRET_KEY=dev \
+  -e BASE_URL=http://localhost:8080 \
+  -e SESSION_COOKIE_SECURE=false \
+  wasted-sun
 ```
 
-On [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform), connect the repo or container, set **HTTP port** `8080`, and configure environment variables (`SECRET_KEY`, `BASE_URL`, `DATABASE_URL`, etc.). Use a **trusted source** or **VPC** connection to Postgres when possible.
+Use **`SESSION_COOKIE_SECURE=false`** when testing over **plain HTTP** (e.g. local Docker); otherwise the **locale cookie** for EN/ES may not stick. Use the default **`true`** behind HTTPS in production.
+
+`docker run` without **`DATABASE_URL`** uses **mock data** (with a default illustrative €/MWh unless you set **`WASTED_SUN_EUR_PER_MWH=0`**).
+
+On [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform), connect the repo or container, set **HTTP port** `8080`, add a **`/health`** HTTP health check if the platform supports it, and configure environment variables (`SECRET_KEY`, `BASE_URL`, `DATABASE_URL`, etc.). Use a **trusted source** or **VPC** connection to Postgres when possible.
 
 See [DATA_CONTRACT.md](DATA_CONTRACT.md) for the expected SQL schema and [`.env.example`](.env.example) for all options.

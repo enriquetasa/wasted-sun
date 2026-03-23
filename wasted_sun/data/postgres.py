@@ -9,7 +9,7 @@ from psycopg import sql
 from psycopg.rows import dict_row
 
 from wasted_sun.models import DailyMetrics, DayNotFoundError, mean_hourly_from_totals
-from wasted_sun.timeseries import QH_SLOTS, merge_qh_across_rows, qh_series_to_hourly_points
+from wasted_sun.timeseries import merge_qh_across_rows, qh_series_to_hourly_points
 
 
 class PostgresMetricsProvider:
@@ -27,7 +27,7 @@ class PostgresMetricsProvider:
         total_mwh_col: str,
         as_of_query: str | None,
         eur_per_mwh: Decimal | None,
-        qh_slots: int = QH_SLOTS,
+        qh_slots: int = 100,
     ) -> None:
         self._dsn = dsn
         self._tz = timezone
@@ -119,14 +119,14 @@ class PostgresMetricsProvider:
 
         qh = merge_qh_across_rows(rows, self._qh_slots)
         hourly, day_mwh_from_qh, day_eur_from_qh = qh_series_to_hourly_points(
-            day, qh, self._tz, self._eur_per_mwh
+            day, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
         )
 
         # Prefer summed quarter-hours for the headline day total; YTD uses total_mwh from SQL.
         day_mwh = day_mwh_from_qh
         ytd_eur = (
             (ytd_mwh * self._eur_per_mwh).quantize(Decimal("0.01"))
-            if self._eur_per_mwh
+            if self._eur_per_mwh and self._eur_per_mwh > 0
             else Decimal("0")
         )
 

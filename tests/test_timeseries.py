@@ -31,3 +31,22 @@ def test_qh_series_to_hourly_points_eur_rate():
     assert len(hourly) == 24
     assert dm == Decimal("8")
     assert de == Decimal("80")
+
+
+def test_n_slots_truncates_tail_for_day_total():
+    tz = ZoneInfo("Europe/Madrid")
+    qh = [Decimal("1")] * 100
+    _, dm96, _ = qh_series_to_hourly_points(
+        date(2024, 1, 1), qh, tz, None, n_slots=96
+    )
+    assert dm96 == Decimal("96")
+    _, dm100, _ = qh_series_to_hourly_points(
+        date(2024, 1, 1), qh, tz, None, n_slots=100
+    )
+    assert dm100 == Decimal("100")
+
+
+def test_merge_qh_case_insensitive_keys():
+    rows = [{"QH_1_MWH": 2}]
+    acc = merge_qh_across_rows(rows, n_slots=1)
+    assert acc[0] == Decimal("2")

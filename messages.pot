@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 15:44+0100\n"
+"POT-Creation-Date: 2026-03-23 15:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,22 +25,26 @@ msgstr ""
 msgid "No data for future dates."
 msgstr ""
 
-#: wasted_sun/views.py:94
+#: wasted_sun/views.py:95
+msgid "No energy data loaded yet."
+msgstr ""
+
+#: wasted_sun/views.py:97
 msgid "No data before coverage starts."
 msgstr ""
 
-#: wasted_sun/views.py:99
+#: wasted_sun/views.py:102
 msgid "No data for this date."
 msgstr ""
 
-#: wasted_sun/views.py:112
+#: wasted_sun/views.py:115
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
 "electricity on %(day)s — %(ytd)s so far this year. %(url)s"
 msgstr ""
 
-#: wasted_sun/views.py:122
+#: wasted_sun/views.py:125
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(mwh_h)s per hour on average in unused solar "
