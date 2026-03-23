@@ -21,20 +21,29 @@
   <h2 id="kpi-headline">{% trans %}Unused solar on the Spanish peninsula{% endtrans %}</h2>
   {% if show_eur %}
   <p class="kpi-big">
+    {% trans day_mwh=fmt_mwh(metrics.day_total_mwh), day_eur=fmt_eur(metrics.day_total_eur) %}
+    This day’s total: {{ day_mwh }} unused solar electricity ({{ day_eur }} at illustrative rates).
+    {% endtrans %}
+  </p>
+  <p class="kpi-secondary">
     {% trans eur_h=fmt_eur(metrics.mean_hourly_eur), mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    Spain’s peninsula wastes about {{ eur_h }} per hour on average in unused solar electricity
-    ({{ mwh_h }}), for this calendar day.
+    About {{ eur_h }} per hour on average over the day ({{ mwh_h }}).
     {% endtrans %}
   </p>
   {% else %}
   <p class="kpi-big">
+    {% trans day_mwh=fmt_mwh(metrics.day_total_mwh) %}
+    This day’s total: {{ day_mwh }} unused solar electricity for this calendar day.
+    {% endtrans %}
+  </p>
+  <p class="kpi-secondary">
     {% trans mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    Spain’s peninsula wastes about {{ mwh_h }} per hour on average in unused solar electricity (MWh), for this calendar day.
+    About {{ mwh_h }} per hour on average over the day.
     {% endtrans %}
   </p>
   {% endif %}
   <p class="kpi-sub">
-    <strong>{% trans %}So far this year (calendar, Europe/Madrid):{% endtrans %}</strong>
+    <strong>{% trans %}So far this year:{% endtrans %}</strong>
     {% if show_eur %}
     {{ fmt_eur(metrics.ytd_eur) }}
     {% trans %}in estimated waste.{% endtrans %}
@@ -42,8 +51,6 @@
     {{ fmt_mwh(metrics.ytd_mwh) }}
     {% trans %}cumulative this year.{% endtrans %}
     {% endif %}
-    <strong>{% trans %}This day total:{% endtrans %}</strong>
-    {{ fmt_mwh(metrics.day_total_mwh) }}.
   </p>
   <p class="meta-asof">{% trans ts=metrics.as_of.strftime('%Y-%m-%d %H:%M %Z') %}Data as of {{ ts }}{% endtrans %}</p>
 </section>
@@ -54,11 +61,26 @@
 
 <section class="share-row">
   <h2>{% trans %}Share Spain’s wasted sun{% endtrans %}</h2>
-  <div class="share-links">
-    <a href="{{ share_linkedin }}" rel="noopener noreferrer" target="_blank">LinkedIn</a>
-    <a href="{{ share_bluesky }}" rel="noopener noreferrer" target="_blank">Bluesky</a>
-    <a href="{{ share_x }}" rel="noopener noreferrer" target="_blank">X</a>
-  </div>
+  <ul class="share-links">
+    <li>
+    <a class="share-btn share-btn--linkedin" href="{{ share_linkedin }}" rel="noopener noreferrer" target="_blank">
+      <svg class="share-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.572v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      <span>{% trans %}LinkedIn{% endtrans %}</span>
+    </a>
+    </li>
+    <li>
+    <a class="share-btn share-btn--bluesky" href="{{ share_bluesky }}" rel="noopener noreferrer" target="_blank">
+      <svg class="share-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.717.258 0 .52 0 .78-.008-.208.434-.458 1.12-.458 1.96 0 1.03.521 1.66 1.088 2.29-1.224 1.098-2.14 2.55-2.14 4.24 0 2.85 2.218 4.48 4.354 4.48 2.136 0 4.354-1.63 4.354-4.48 0-1.69-.916-3.142-2.14-4.24.566-.63 1.088-1.26 1.088-2.29 0-.84-.25-1.526-.458-1.96.26.008.522.008.78.008 2.67-.057 5.568-.981 6.383-3.717.246-.829.624-5.789.624-6.479 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.747 13.087 8.686 12 10.8Z"/></svg>
+      <span>{% trans %}Bluesky{% endtrans %}</span>
+    </a>
+    </li>
+    <li>
+    <a class="share-btn share-btn--x" href="{{ share_x }}" rel="noopener noreferrer" target="_blank">
+      <svg class="share-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>{% trans %}X{% endtrans %}</span>
+    </a>
+    </li>
+  </ul>
 </section>
 
 <section class="prose">
@@ -93,9 +115,10 @@
   <h2>{% trans %}Methodology{% endtrans %}</h2>
   <p>
     {% trans %}
-    Quarter-hourly unused solar energy (MWh) comes from the project database: each row is keyed by
-    date_day with columns qh_1_mwh through qh_100_mwh (15-minute buckets). Multiple rows for the same
-    day are summed bucket-wise before display.
+    Quarter-hourly unused solar energy (MWh) is derived from Red Eléctrica de España (REE) data.
+    It is processed in a separate pipeline and stored in this project’s database before it is shown here:
+    each row is keyed by date_day with columns qh_1_mwh through qh_100_mwh (15-minute buckets).
+    Multiple rows for the same day are summed bucket-wise before display.
     {% endtrans %}
   </p>
   <p>
@@ -103,7 +126,7 @@
     The chart aggregates those quarter-hours into 24 hourly bars (Europe/Madrid calendar day). Any slots
     beyond the first 96 are folded into the last hour of the day. Day totals are the sum of all
     quarter-hour values. “So far this year” uses SUM(total_mwh) across rows from 1 January through the
-    selected date. The headline “per hour” figure is the mean of the 24 hourly bars (equivalently the
+    selected date. The average “per hour” figure is the mean of the 24 hourly bars (equivalently the
     day total divided by 24).
     {% endtrans %}
   </p>
@@ -151,7 +174,8 @@
 
 <p class="disclaimer">
   {% trans %}
-  Figures are estimates for public understanding, not official Red Eléctrica or government statistics.
+  Figures are derived from Red Eléctrica de España data and processed independently for this site;
+  they are not official REE publications or government statistics.
   {% endtrans %}
 </p>
 <p class="disclaimer">

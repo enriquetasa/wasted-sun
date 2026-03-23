@@ -120,21 +120,25 @@ def day_view(day_str: str):
     show_eur = _show_eur()
     if show_eur:
         share_text = _(
-            "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
-            "electricity on %(day)s — %(ytd)s so far this year. %(url)s"
+            "Spain (peninsula) unused solar %(day)s: %(day_mwh)s "
+            "(%(day_eur)s illustrative) — %(eur_h)s/h on average. "
+            "YTD: %(ytd)s. %(url)s"
         ) % {
-            "eur_h": fmt_eur(metrics.mean_hourly_eur),
             "day": day.isoformat(),
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "day_eur": fmt_eur(metrics.day_total_eur),
+            "eur_h": fmt_eur(metrics.mean_hourly_eur),
             "ytd": fmt_eur(metrics.ytd_eur),
             "url": share_url,
         }
     else:
         share_text = _(
-            "Spain (peninsula) wastes %(mwh_h)s per hour on average in unused solar "
-            "electricity (MWh) on %(day)s — %(ytd)s MWh so far this year. %(url)s"
+            "Spain (peninsula) unused solar %(day)s: %(day_mwh)s "
+            "— %(mwh_h)s/h on average. YTD: %(ytd)s MWh. %(url)s"
         ) % {
-            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
             "day": day.isoformat(),
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
             "ytd": fmt_mwh(metrics.ytd_mwh),
             "url": share_url,
         }

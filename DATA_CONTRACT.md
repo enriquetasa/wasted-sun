@@ -1,6 +1,6 @@
 # Data contract (PostgreSQL)
 
-The app expects **one or more rows per `date_day`**, each with up to **100 quarter-hourly MWh columns** (`qh_1_mwh` … `qh_100_mwh`) plus metadata. This matches wide exports such as i3dia-style daily tables.
+The app expects **one or more rows per `date_day`**, each with up to **100 quarter-hourly MWh columns** (`qh_1_mwh` … `qh_100_mwh`) plus metadata. This matches wide exports such as i3dia-style daily tables. In a typical deployment those MWh values are **derived from Red Eléctrica de España (REE) data** and transformed in an **upstream pipeline** before they reach this database (mock mode uses synthetic data instead).
 
 ## Required / used columns
 
