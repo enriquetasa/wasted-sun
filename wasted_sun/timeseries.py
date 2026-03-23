@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Sequence
 from zoneinfo import ZoneInfo
 
@@ -28,7 +28,10 @@ def merge_qh_across_rows(rows: Sequence[dict], n_slots: int = QH_SLOTS) -> list[
             if v is None:
                 v = lower.get(key.lower())
             if v is not None:
-                acc[i] += Decimal(str(v))
+                try:
+                    acc[i] += Decimal(str(v))
+                except (InvalidOperation, ValueError):
+                    pass
     return acc
 
 
