@@ -24,6 +24,9 @@ dev = [
 where = ["."]
 include = ["wasted_sun*"]
 
+[tool.setuptools.package-data]
+wasted_sun = ["templates/*.html", "static/**/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
