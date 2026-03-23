@@ -24,15 +24,15 @@ class Config:
         "PLAUSIBLE_SCRIPT_URL", "https://plausible.io/js/script.js"
     ).strip()
 
-    # Postgres hourly table (override when wiring real schema)
-    PG_TABLE = os.environ.get("WASTED_SUN_PG_TABLE", "wasted_sun_hourly")
-    PG_COL_TS = os.environ.get("WASTED_SUN_PG_COL_TS", "bucket_start")
-    PG_COL_MWH = os.environ.get("WASTED_SUN_PG_COL_MWH", "mwh_unused")
-    PG_COL_EUR = os.environ.get("WASTED_SUN_PG_COL_EUR", "eur_waste")
+    # Postgres: one or more rows per date_day, quarter-hourly qh_1_mwh … qh_N_mwh
+    PG_TABLE = os.environ.get("WASTED_SUN_PG_TABLE", "wasted_sun_qh_daily")
+    PG_COL_DATE_DAY = os.environ.get("WASTED_SUN_PG_COL_DATE_DAY", "date_day")
+    PG_COL_TOTAL_MWH = os.environ.get("WASTED_SUN_PG_COL_TOTAL_MWH", "total_mwh")
+    PG_QH_SLOTS = int(os.environ.get("WASTED_SUN_PG_QH_SLOTS", "100"))
     PG_AS_OF_QUERY = os.environ.get(
         "WASTED_SUN_PG_AS_OF_QUERY",
-        "",  # e.g. SELECT max(updated_at) FROM wasted_sun_meta
-    )
+        "",
+    ).strip()
 
 
 class DevelopmentConfig(Config):

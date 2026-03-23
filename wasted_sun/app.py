@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 
 from dotenv import load_dotenv
 from flask import Flask, session
@@ -23,6 +24,16 @@ def create_app() -> Flask:
 
     if not app.config.get("DATABASE_URL"):
         app.config["USE_MOCK_DATA"] = True
+
+    raw_eur = os.environ.get("WASTED_SUN_EUR_PER_MWH")
+    if raw_eur is not None and str(raw_eur).strip() != "":
+        app.config["EUR_PER_MWH"] = Decimal(str(raw_eur).strip())
+    else:
+        app.config["EUR_PER_MWH"] = None
+
+    mockish = app.config.get("USE_MOCK_DATA") or not app.config.get("DATABASE_URL")
+    if mockish and app.config["EUR_PER_MWH"] is None:
+        app.config["EUR_PER_MWH"] = Decimal("52")
 
     app.config.setdefault(
         "HOUSEHOLD_DAY_KWH",

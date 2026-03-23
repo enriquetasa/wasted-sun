@@ -45,6 +45,11 @@ def _city_analogy_households(day_mwh: Decimal) -> int:
     return int(equiv.to_integral_value())
 
 
+def _show_eur() -> bool:
+    rate = current_app.config.get("EUR_PER_MWH")
+    return rate is not None and rate > 0
+
+
 @bp.before_app_request
 def _locale_from_query() -> None:
     lang = request.args.get("lang")
@@ -101,19 +106,27 @@ def day_view(day_str: str):
     share_path = f"{day.isoformat()}/"
     share_url = f"{current_app.config['BASE_URL'].rstrip('/')}/{share_path}"
 
-    mean_eur = metrics.mean_hourly_eur
-    mean_mwh = metrics.mean_hourly_mwh
-    ytd_eur = metrics.ytd_eur
-
-    share_text = _(
-        "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
-        "electricity on %(day)s — %(ytd)s so far this year. %(url)s"
-    ) % {
-        "eur_h": fmt_eur(mean_eur),
-        "day": day.isoformat(),
-        "ytd": fmt_eur(ytd_eur),
-        "url": share_url,
-    }
+    show_eur = _show_eur()
+    if show_eur:
+        share_text = _(
+            "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
+            "electricity on %(day)s — %(ytd)s so far this year. %(url)s"
+        ) % {
+            "eur_h": fmt_eur(metrics.mean_hourly_eur),
+            "day": day.isoformat(),
+            "ytd": fmt_eur(metrics.ytd_eur),
+            "url": share_url,
+        }
+    else:
+        share_text = _(
+            "Spain (peninsula) wastes %(mwh_h)s per hour on average in unused solar "
+            "electricity (MWh) on %(day)s — %(ytd)s MWh so far this year. %(url)s"
+        ) % {
+            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
+            "day": day.isoformat(),
+            "ytd": fmt_mwh(metrics.ytd_mwh),
+            "url": share_url,
+        }
 
     linkedin = "https://www.linkedin.com/shareArticle?" + urlencode(
         {"url": share_url, "text": share_text}, quote_via=quote
@@ -147,6 +160,7 @@ def day_view(day_str: str):
         chart_mwh_json=json.dumps(chart_mwh),
         city_homes_equiv=homes,
         household_day_kwh=_household_day_kwh(),
+        show_eur=show_eur,
     )
 
 

@@ -1,6 +1,6 @@
 # Wasted Sun
 
-Flask dashboard for **peninsula** “unused solar” metrics: hourly data from **PostgreSQL** (or **mock** data locally), **Spanish by default** with an **English** language toggle, styled for deployment on **DigitalOcean App Platform**.
+Flask dashboard for **peninsula** “unused solar” metrics: **quarter-hourly** `qh_*_mwh` columns per `date_day` in **PostgreSQL** (i3dia-style wide rows, or **mock** data locally), rolled up to **24 hourly** chart bars. **Spanish by default** with an **English** language toggle, aimed at **DigitalOcean App Platform**.
 
 ## Local development
 

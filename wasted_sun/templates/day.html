@@ -19,16 +19,29 @@
 
 <section class="kpi-block" aria-labelledby="kpi-headline">
   <h2 id="kpi-headline">{% trans %}Unused solar on the Spanish peninsula{% endtrans %}</h2>
+  {% if show_eur %}
   <p class="kpi-big">
     {% trans eur_h=fmt_eur(metrics.mean_hourly_eur), mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
     Spain’s peninsula wastes about {{ eur_h }} per hour on average in unused solar electricity
     ({{ mwh_h }}), for this calendar day.
     {% endtrans %}
   </p>
+  {% else %}
+  <p class="kpi-big">
+    {% trans mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
+    Spain’s peninsula wastes about {{ mwh_h }} per hour on average in unused solar electricity (MWh), for this calendar day.
+    {% endtrans %}
+  </p>
+  {% endif %}
   <p class="kpi-sub">
     <strong>{% trans %}So far this year (calendar, Europe/Madrid):{% endtrans %}</strong>
+    {% if show_eur %}
     {{ fmt_eur(metrics.ytd_eur) }}
     {% trans %}in estimated waste.{% endtrans %}
+    {% else %}
+    {{ fmt_mwh(metrics.ytd_mwh) }}
+    {% trans %}cumulative this year.{% endtrans %}
+    {% endif %}
     <strong>{% trans %}This day total:{% endtrans %}</strong>
     {{ fmt_mwh(metrics.day_total_mwh) }}.
   </p>
@@ -80,15 +93,24 @@
   <h2>{% trans %}Methodology{% endtrans %}</h2>
   <p>
     {% trans %}
-    Hourly “unused” solar energy and associated euro estimates come from a database maintained by the
-    project owner; this site only aggregates and displays those values for the Spanish peninsula.
+    Quarter-hourly unused solar energy (MWh) comes from the project database: each row is keyed by
+    date_day with columns qh_1_mwh through qh_100_mwh (15-minute buckets). Multiple rows for the same
+    day are summed bucket-wise before display.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    Day totals sum hourly rows (Europe/Madrid calendar day). “So far this year” sums from 1 January
-    through the end of the selected day, same timezone. The “per hour” headline uses the mean of the
-    hourly values for that day.
+    The chart aggregates those quarter-hours into 24 hourly bars (Europe/Madrid calendar day). Any slots
+    beyond the first 96 are folded into the last hour of the day. Day totals are the sum of all
+    quarter-hour values. “So far this year” uses SUM(total_mwh) across rows from 1 January through the
+    selected date. The headline “per hour” figure is the mean of the 24 hourly bars (equivalently the
+    day total divided by 24).
+    {% endtrans %}
+  </p>
+  <p>
+    {% trans %}
+    Euro amounts appear only when WASTED_SUN_EUR_PER_MWH is set; they are a simple illustrative rate
+    times energy, not a market settlement.
     {% endtrans %}
   </p>
   <h3>{% trans %}Household analogy{% endtrans %}</h3>
@@ -96,6 +118,15 @@
     {% trans %}
     The household comparison uses a configurable illustrative kWh/day figure to give an intuitive
     scale; replace or calibrate it when you publish official assumptions.
+    {% endtrans %}
+  </p>
+</section>
+
+<section class="prose">
+  <h2>{% trans %}About{% endtrans %}</h2>
+  <p>
+    {% trans %}
+    Built by Enrique Tasa, Head of Technology at Octopus Energy Spain.
     {% endtrans %}
   </p>
 </section>
