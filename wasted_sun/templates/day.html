@@ -18,65 +18,65 @@
 </nav>
 
 <section class="kpi-hero" aria-labelledby="kpi-headline">
-  <h2 id="kpi-headline" class="kpi-hero__title">{% trans %}Solar going unused on the Spanish peninsula{% endtrans %}</h2>
+  <h2 id="kpi-headline" class="kpi-hero__title">{% trans %}Clean solar Spain’s peninsula had to waste{% endtrans %}</h2>
   <div class="kpi-hero__deck">
     <article class="kpi-card kpi-card--energy">
-      <h3 class="kpi-card__label">{% trans %}This day’s total{% endtrans %}</h3>
+      <h3 class="kpi-card__label">{% trans %}What we threw away that day{% endtrans %}</h3>
       <p class="kpi-card__value">
         <span class="no-js-only">{{ fmt_mwh(metrics.day_total_mwh) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_mwh }}" data-final="{{ fmt_mwh(metrics.day_total_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}Solar output the grid could not use that day{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}The sun did its job; the system didn’t. Clean MWh left sitting on the wires.{% endtrans %}</p>
     </article>
     {% if show_eur %}
     <article class="kpi-card kpi-card--money">
-      <h3 class="kpi-card__label">{% trans %}Illustrative € equivalent{% endtrans %}</h3>
+      <h3 class="kpi-card__label">{% trans %}Rough euros down the drain{% endtrans %}</h3>
       <p class="kpi-card__value">
         <span class="no-js-only">{{ fmt_eur(metrics.day_total_eur) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_eur }}" data-final="{{ fmt_eur(metrics.day_total_eur) }}" data-kind="eur">{{ zero_eur }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}Uses this site’s €/MWh setting × MWh—not a market price or your bill.{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}Ballpark only: your site’s €/MWh × those MWh—not your bill, not a market truth, still galling.{% endtrans %}</p>
     </article>
     {% endif %}
   </div>
   {% if show_eur %}
   <p class="kpi-hero__secondary">
     {% trans eur_h=fmt_eur(metrics.mean_hourly_eur), mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    Averaging about {{ eur_h }} per hour for this day ({{ mwh_h }}).
+    About {{ eur_h }} each hour on average—{{ mwh_h }}—and it stacks up faster than it should.
     {% endtrans %}
   </p>
   {% else %}
   <p class="kpi-hero__secondary">
     {% trans mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
-    Averaging about {{ mwh_h }} per hour for this day.
+    About {{ mwh_h }} each hour on average—quietly, relentlessly, all day.
     {% endtrans %}
   </p>
   {% endif %}
   <p class="kpi-sub">
-    <strong>{% trans %}So far this year:{% endtrans %}</strong>
+    <strong>{% trans %}Year to date—still counting:{% endtrans %}</strong>
     {% if show_eur %}
     <span class="kpi-ytd-anim">
       <span class="no-js-only">{{ fmt_eur(metrics.ytd_eur) }}</span>
       <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_eur }}" data-final="{{ fmt_eur(metrics.ytd_eur) }}" data-kind="eur">{{ zero_eur }}</span>
     </span>
-    {% trans %}at that illustrative €/MWh rate.{% endtrans %}
+    {% trans %}at that illustrative €/MWh—too much to treat as noise.{% endtrans %}
     {% else %}
     <span class="kpi-ytd-anim">
       <span class="no-js-only">{{ fmt_mwh(metrics.ytd_mwh) }}</span>
       <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_mwh }}" data-final="{{ fmt_mwh(metrics.ytd_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
     </span>
-    {% trans %}in total.{% endtrans %}
+    {% trans %}MWh—and the calendar still has pages left.{% endtrans %}
     {% endif %}
   </p>
   <p class="meta-asof">{% trans ts=metrics.as_of.strftime('%Y-%m-%d %H:%M %Z') %}Data as of {{ ts }}{% endtrans %}</p>
 </section>
 
 <div class="chart-wrap">
-  <canvas id="hourly-chart" aria-label="{% trans %}Hourly unused solar energy{% endtrans %}"></canvas>
+  <canvas id="hourly-chart" aria-label="{% trans %}Hour by hour: solar we didn’t use (MWh){% endtrans %}"></canvas>
 </div>
 
 <section class="share-row">
-  <h2>{% trans %}Share Spain’s wasted sun{% endtrans %}</h2>
+  <h2>{% trans %}If this makes you quietly furious, say so{% endtrans %}</h2>
   <ul class="share-links">
     <li>
     <a class="share-btn share-btn--linkedin" href="{{ share_linkedin }}" rel="noopener noreferrer" target="_blank">
@@ -100,29 +100,30 @@
 </section>
 
 <section class="prose">
-  <h2>{% trans %}Why pay for the same electricity twice?{% endtrans %}</h2>
+  <h2>{% trans %}Why on earth are we paying twice for the same electrons?{% endtrans %}</h2>
   <p>
     {% trans %}
-    On sunny hours, the peninsula sometimes produces more solar power than the grid can absorb locally.
-    That energy may go unused while other plants stay in the mix—so consumers can end up paying for
-    flexibility and constraints twice over.
+    On bright days the peninsula often makes more solar than the local grid can swallow. Instead of
+    using every electron we grew for free, we leave it on the table while other kit keeps running—
+    and households foot the bill for flexibility twice. Politely put: that should embarrass us.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    <strong>What helps?</strong> Stronger grids and storage over time—and market signals that reward
-    using clean power when it is abundant, which can reduce waste and ease bills.
+    <strong>What would actually help?</strong> Grids and storage we stop talking about and start building,
+    plus price signals that pay people to use clean power when the sun is generous. Less waste, lower
+    bills, fewer excuses. We know what to do.
     {% endtrans %}
   </p>
 </section>
 
 <section class="prose">
-  <h2>{% trans %}City-sized picture{% endtrans %}</h2>
+  <h2>{% trans %}City-sized anger{% endtrans %}</h2>
   <p>
     {% trans homes=fmt_int(city_homes_equiv), kwh=household_day_kwh %}
-    Today’s unused solar total is in the ballpark of the daily electricity of about
-    <strong>{{ homes }}</strong> typical homes, using an illustrative {{ kwh }} kWh per home per day
-    for the analogy (not a census count—see methodology).
+    Today’s pile of unused solar is in the same league as the daily use of about
+    <strong>{{ homes }}</strong> ordinary homes (illustrative {{ kwh }} kWh per home per day—not a census,
+    see methodology). That’s not abstract; that’s kitchens and lights someone could have run for free.
     {% endtrans %}
   </p>
 </section>
@@ -131,10 +132,10 @@
   <h2>{% trans %}Methodology{% endtrans %}</h2>
   <p>
     {% trans %}
-    Quarter-hourly unused solar energy (MWh) is derived from Red Eléctrica de España (REE) data.
-    It is processed in a separate pipeline and stored in this project’s database before it is shown here:
-    each row is keyed by date_day with columns qh_1_mwh through qh_100_mwh (15-minute buckets).
-    Multiple rows for the same day are summed bucket-wise before display.
+    The waste you see is real enough to measure—which is the infuriating part. Quarter-hourly unused
+    solar (MWh) comes from Red Eléctrica de España (REE) data, then through a separate pipeline into
+    this project’s database: rows keyed by date_day with qh_1_mwh through qh_100_mwh (15-minute buckets).
+    Same calendar day, multiple rows: we sum buckets before showing anything.
     {% endtrans %}
   </p>
   <p>
@@ -148,8 +149,8 @@
   </p>
   <p>
     {% trans %}
-    Euro amounts appear only when WASTED_SUN_EUR_PER_MWH is set; they are a simple illustrative rate
-    times energy, not a market settlement.
+    Euro figures only appear if WASTED_SUN_EUR_PER_MWH is set: a blunt illustrative rate × energy,
+    not a market invoice—still useful for remembering this isn’t “free” in anyone’s pocket.
     {% endtrans %}
   </p>
   <h3>{% trans %}Household analogy{% endtrans %}</h3>
@@ -178,12 +179,14 @@
   <h2>{% trans %}About{% endtrans %}</h2>
   <p>
     {% trans %}
-    I built Wasted Sun as a private individual. It is not an official Octopus Energy product, website, or communication.
+    I built Wasted Sun on my own time, because watching good solar go to waste is maddening—and I’d
+    rather show the numbers than swallow them. It is not an official Octopus Energy product, site, or comms.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    I care a great deal about this topic in part because of my role as Head of Technology at Octopus Energy Spain — but except where stated otherwise, the analysis and opinions here are mine alone and do not represent my employer.
+    I care fiercely about this in part because of my day job as Head of Technology at Octopus Energy Spain—
+    but unless I say otherwise, every sharp word and chart choice here is mine, not my employer’s.
     {% endtrans %}
   </p>
 </section>
@@ -215,7 +218,7 @@
       data: {
         labels,
         datasets: [{
-          label: {{ _('Unused solar (MWh)')|tojson }},
+          label: {{ _('Solar wasted (MWh)')|tojson }},
           data,
           backgroundColor: 'rgba(217, 119, 6, 0.55)',
           borderColor: 'rgba(180, 83, 9, 0.95)',
