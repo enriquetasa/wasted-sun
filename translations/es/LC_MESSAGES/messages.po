@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wasted-sun 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-23 17:41+0100\n"
+"POT-Creation-Date: 2026-03-23 17:43+0100\n"
 "PO-Revision-Date: 2026-03-23 15:30+0100\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -427,6 +427,10 @@ msgstr ""
 #: wasted_sun/templates/day.html:223
 msgid "Unused solar (MWh)"
 msgstr "Solar no utilizado (MWh)"
+
+#: wasted_sun/templates/day.html:241
+msgid "MWh"
+msgstr "MWh"
 
 #: wasted_sun/templates/error.html:2
 msgid "Error"
