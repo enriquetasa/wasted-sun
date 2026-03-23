@@ -19,7 +19,7 @@ from flask_babel import gettext as _
 
 from wasted_sun.data.base import get_provider
 from wasted_sun.exceptions import ConfigurationError
-from wasted_sun.formatting import fmt_decimal, fmt_eur, fmt_int, fmt_mwh
+from wasted_sun.formatting import fmt_eur, fmt_int, fmt_mwh
 from wasted_sun.models import DayNotFoundError
 
 bp = Blueprint("main", __name__)
@@ -61,7 +61,6 @@ def _locale_from_query() -> None:
 @bp.app_context_processor
 def _inject_config() -> dict:
     return {
-        "base_url": current_app.config["BASE_URL"],
         "plausible_domain": current_app.config.get("PLAUSIBLE_DOMAIN") or "",
         "plausible_script_url": current_app.config.get("PLAUSIBLE_SCRIPT_URL")
         or "https://plausible.io/js/script.js",
@@ -161,14 +160,12 @@ def day_view(day_str: str):
         metrics=metrics,
         day=day,
         today=today,
-        earliest=earliest,
         prev_day=prev_day,
         next_day=next_day,
         prev_ok=prev_ok,
         next_ok=next_ok,
         fmt_mwh=fmt_mwh,
         fmt_eur=fmt_eur,
-        fmt_decimal=fmt_decimal,
         fmt_int=fmt_int,
         share_linkedin=linkedin,
         share_bluesky=bluesky,
