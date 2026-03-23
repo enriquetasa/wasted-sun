@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 
 from flask import (
     Blueprint,
@@ -186,6 +186,7 @@ def set_locale(lang: str):
         return redirect(url_for("main.index"))
     session["locale"] = lang
     dest = request.args.get("next") or "/"
-    if not dest.startswith("/") or dest.startswith("//"):
+    parsed = urlparse(dest)
+    if parsed.scheme or parsed.netloc or not dest.startswith("/"):
         dest = url_for("main.index")
     return redirect(dest)

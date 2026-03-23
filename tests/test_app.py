@@ -49,6 +49,13 @@ def test_set_locale_redirect(client):
 
 
 def test_set_locale_rejects_open_redirect(client):
-    r = client.get("/set-locale/en/?next=https://evil.example/", follow_redirects=False)
-    assert r.status_code == 302
-    assert "evil" not in r.headers["Location"]
+    for payload in (
+        "https://evil.example/",
+        "//evil.example/",
+        "\\evil.example/",
+        "javascript:alert(1)",
+    ):
+        r = client.get(f"/set-locale/en/?next={payload}", follow_redirects=False)
+        assert r.status_code == 302
+        assert "evil" not in r.headers["Location"]
+        assert "javascript" not in r.headers["Location"]
