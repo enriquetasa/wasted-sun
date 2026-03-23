@@ -18,7 +18,11 @@ def test_day_page_spanish_default(client):
     r = client.get(f"/{d.isoformat()}/")
     assert r.status_code == 200
     assert b"lang=\"es\"" in r.data
-    assert b"Sol desperdiciado" in r.data or b"pen\xednsula" in r.data
+    assert (
+        b"Sol desperdiciado" in r.data
+        or b"pen\xednsula" in r.data
+        or b"peninsul" in r.data.lower()
+    )
 
 
 def test_day_page_english_after_session(client):

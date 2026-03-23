@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 16:08+0100\n"
+"POT-Creation-Date: 2026-03-23 16:39+0100\n"
 "PO-Revision-Date: 2026-03-23 15:06+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -56,12 +56,12 @@ msgid ""
 "average. YTD: %(ytd)s MWh. %(url)s"
 msgstr ""
 
-#: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:18
+#: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
 #: wasted_sun/templates/day.html:2
 msgid "Wasted Sun"
 msgstr ""
 
-#: wasted_sun/templates/base.html:19
+#: wasted_sun/templates/base.html:23
 msgid "Language"
 msgstr ""
 
@@ -94,15 +94,22 @@ msgid "Unused solar on the Spanish peninsula"
 msgstr ""
 
 #: wasted_sun/templates/day.html:24
-#, python-format
-msgid ""
-"\n"
-"    This day’s total: %(day_mwh)s wasted solar electricity (%(day_eur)s "
-"at illustrative rates).\n"
-"    "
+msgid "This day’s total"
 msgstr ""
 
 #: wasted_sun/templates/day.html:29
+msgid "Unused solar electricity"
+msgstr ""
+
+#: wasted_sun/templates/day.html:33
+msgid "Illustrative cost"
+msgstr ""
+
+#: wasted_sun/templates/day.html:38
+msgid "At your configured €/MWh rate (not a market bill)"
+msgstr ""
+
+#: wasted_sun/templates/day.html:44
 #, python-format
 msgid ""
 "\n"
@@ -110,16 +117,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:35
-#, python-format
-msgid ""
-"\n"
-"    This day’s total: %(day_mwh)s wasted solar electricity for this "
-"calendar day.\n"
-"    "
-msgstr ""
-
-#: wasted_sun/templates/day.html:40
+#: wasted_sun/templates/day.html:50
 #, python-format
 msgid ""
 "\n"
@@ -127,77 +125,77 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:46
+#: wasted_sun/templates/day.html:56
 msgid "So far this year:"
 msgstr ""
 
-#: wasted_sun/templates/day.html:49
+#: wasted_sun/templates/day.html:62
 msgid "in estimated waste."
 msgstr ""
 
-#: wasted_sun/templates/day.html:52
+#: wasted_sun/templates/day.html:68
 msgid "cumulative this year."
 msgstr ""
 
-#: wasted_sun/templates/day.html:55
+#: wasted_sun/templates/day.html:71
 #, python-format
 msgid "Data as of %(ts)s"
 msgstr ""
 
-#: wasted_sun/templates/day.html:59
+#: wasted_sun/templates/day.html:75
 msgid "Hourly unused solar energy"
 msgstr ""
 
-#: wasted_sun/templates/day.html:63
+#: wasted_sun/templates/day.html:79
 msgid "Share Spain’s wasted sun"
 msgstr ""
 
-#: wasted_sun/templates/day.html:68
+#: wasted_sun/templates/day.html:84
 msgid "LinkedIn"
 msgstr ""
 
-#: wasted_sun/templates/day.html:74
+#: wasted_sun/templates/day.html:90
 msgid "Bluesky"
 msgstr ""
 
-#: wasted_sun/templates/day.html:80
+#: wasted_sun/templates/day.html:96
 msgid "X"
 msgstr ""
 
-#: wasted_sun/templates/day.html:87
+#: wasted_sun/templates/day.html:103
 msgid "Why pay for the same electricity twice?"
 msgstr ""
 
-#: wasted_sun/templates/day.html:89
+#: wasted_sun/templates/day.html:105
 msgid ""
 "\n"
-"    On sunny hours, currently installed renewable sources sometimes produces more solar power "
+"    On sunny hours, the peninsula sometimes produces more solar power "
 "than the grid can absorb locally.\n"
-"    That energy may go unused while other, less clean sources stay in the mix—so "
+"    That energy may go unused while other plants stay in the mix—so "
 "consumers can end up paying for\n"
 "    flexibility and constraints twice over.\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:96
+#: wasted_sun/templates/day.html:112
 msgid ""
 "\n"
-"    <strong>What helps?</strong> Stronger grids and storage (batteries) over time—and"
+"    <strong>What helps?</strong> Stronger grids and storage over time—and"
 " market signals that reward\n"
 "    using clean power when it is abundant, which can reduce waste and "
 "ease bills.\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:104
+#: wasted_sun/templates/day.html:120
 msgid "City-sized picture"
 msgstr ""
 
-#: wasted_sun/templates/day.html:106
+#: wasted_sun/templates/day.html:122
 #, python-format
 msgid ""
 "\n"
-"    Today’s wasted solar total is in the ballpark of the daily "
+"    Today’s unused solar total is in the ballpark of the daily "
 "electricity of about\n"
 "    <strong>%(homes)s</strong> typical homes, using an illustrative "
 "%(kwh)s kWh per home per day\n"
@@ -205,24 +203,25 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:115
+#: wasted_sun/templates/day.html:131
 msgid "Methodology"
 msgstr ""
 
-#: wasted_sun/templates/day.html:117
+#: wasted_sun/templates/day.html:133
 msgid ""
 "\n"
 "    Quarter-hourly unused solar energy (MWh) is derived from Red "
 "Eléctrica de España (REE) data.\n"
 "    It is processed in a separate pipeline and stored in this project’s "
 "database before it is shown here:\n"
-"    each row is keyed by date in 15-minute buckets.\n"
+"    each row is keyed by date_day with columns qh_1_mwh through "
+"qh_100_mwh (15-minute buckets).\n"
 "    Multiple rows for the same day are summed bucket-wise before display."
 "\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:125
+#: wasted_sun/templates/day.html:141
 msgid ""
 "\n"
 "    The chart aggregates those quarter-hours into 24 hourly bars "
@@ -237,20 +236,20 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:134
+#: wasted_sun/templates/day.html:150
 msgid ""
 "\n"
-"    Euro amounts are set at"
-" simple illustrative rates\n"
+"    Euro amounts appear only when WASTED_SUN_EUR_PER_MWH is set; they are"
+" a simple illustrative rate\n"
 "    times energy, not a market settlement.\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:139
+#: wasted_sun/templates/day.html:155
 msgid "Household analogy"
 msgstr ""
 
-#: wasted_sun/templates/day.html:141
+#: wasted_sun/templates/day.html:157
 msgid ""
 "\n"
 "    The household comparison uses a configurable illustrative kWh/day "
@@ -260,22 +259,22 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:149
+#: wasted_sun/templates/day.html:165
 msgid "Credits"
 msgstr ""
 
-#: wasted_sun/templates/day.html:151
+#: wasted_sun/templates/day.html:167
 msgid ""
 "\n"
 "    This site was directly inspired by\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:154
+#: wasted_sun/templates/day.html:170
 msgid "Wasted Wind"
 msgstr ""
 
-#: wasted_sun/templates/day.html:155
+#: wasted_sun/templates/day.html:171
 msgid ""
 "\n"
 "    a data project by Robin Hawkes about wasted wind energy in Great "
@@ -284,11 +283,11 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:162
+#: wasted_sun/templates/day.html:178
 msgid "About"
 msgstr ""
 
-#: wasted_sun/templates/day.html:164
+#: wasted_sun/templates/day.html:180
 msgid ""
 "\n"
 "    I built Wasted Sun as a private individual. It is not an official "
@@ -296,7 +295,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:169
+#: wasted_sun/templates/day.html:185
 msgid ""
 "\n"
 "    I care a great deal about this topic in part because of my role as "
@@ -306,7 +305,7 @@ msgid ""
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:176
+#: wasted_sun/templates/day.html:192
 msgid ""
 "\n"
 "  Figures are derived from Red Eléctrica de España data and processed "
@@ -315,7 +314,7 @@ msgid ""
 "  "
 msgstr ""
 
-#: wasted_sun/templates/day.html:182
+#: wasted_sun/templates/day.html:198
 msgid ""
 "\n"
 "  This is a personal side project by Enrique Tasa and is not endorsed by "
@@ -323,7 +322,7 @@ msgid ""
 "  "
 msgstr ""
 
-#: wasted_sun/templates/day.html:197
+#: wasted_sun/templates/day.html:218
 msgid "Unused solar (MWh)"
 msgstr ""
 
@@ -439,5 +438,81 @@ msgstr ""
 #~ "understanding, not official Red Eléctrica "
 #~ "or government statistics.\n"
 #~ "  "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    This day’s total: %(day_mwh)s wasted"
+#~ " solar electricity (%(day_eur)s at "
+#~ "illustrative rates).\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    This day’s total: %(day_mwh)s wasted"
+#~ " solar electricity for this calendar "
+#~ "day.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    On sunny hours, currently installed"
+#~ " renewable sources sometimes produces more"
+#~ " solar power than the grid can "
+#~ "absorb locally.\n"
+#~ "    That energy may go unused "
+#~ "while other, less clean sources stay "
+#~ "in the mix—so consumers can end up"
+#~ " paying for\n"
+#~ "    flexibility and constraints twice over.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    <strong>What helps?</strong> Stronger "
+#~ "grids and storage (batteries) over "
+#~ "time—and market signals that reward\n"
+#~ "    using clean power when it is"
+#~ " abundant, which can reduce waste and"
+#~ " ease bills.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    Today’s wasted solar total is "
+#~ "in the ballpark of the daily "
+#~ "electricity of about\n"
+#~ "    <strong>%(homes)s</strong> typical homes, "
+#~ "using an illustrative %(kwh)s kWh per"
+#~ " home per day\n"
+#~ "    for the analogy (not a census count—see methodology).\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    Quarter-hourly unused solar energy"
+#~ " (MWh) is derived from Red Eléctrica"
+#~ " de España (REE) data.\n"
+#~ "    It is processed in a separate"
+#~ " pipeline and stored in this "
+#~ "project’s database before it is shown"
+#~ " here:\n"
+#~ "    each row is keyed by date in 15-minute buckets.\n"
+#~ "    Multiple rows for the same day"
+#~ " are summed bucket-wise before "
+#~ "display.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    Euro amounts are set at simple illustrative rates\n"
+#~ "    times energy, not a market settlement.\n"
+#~ "    "
 #~ msgstr ""
 

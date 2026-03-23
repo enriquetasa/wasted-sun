@@ -17,26 +17,36 @@
   <a class="btn today-link" href="{{ url_for('main.day_view', day_str=today.isoformat()) }}">{% trans %}Today{% endtrans %}</a>
 </nav>
 
-<section class="kpi-block" aria-labelledby="kpi-headline">
-  <h2 id="kpi-headline">{% trans %}Unused solar on the Spanish peninsula{% endtrans %}</h2>
+<section class="kpi-hero" aria-labelledby="kpi-headline">
+  <h2 id="kpi-headline" class="kpi-hero__title">{% trans %}Unused solar on the Spanish peninsula{% endtrans %}</h2>
+  <div class="kpi-hero__deck">
+    <article class="kpi-card kpi-card--energy">
+      <h3 class="kpi-card__label">{% trans %}This day’s total{% endtrans %}</h3>
+      <p class="kpi-card__value">
+        <span class="no-js-only">{{ fmt_mwh(metrics.day_total_mwh) }}</span>
+        <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_mwh }}" data-final="{{ fmt_mwh(metrics.day_total_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
+      </p>
+      <p class="kpi-card__hint">{% trans %}Unused solar electricity{% endtrans %}</p>
+    </article>
+    {% if show_eur %}
+    <article class="kpi-card kpi-card--money">
+      <h3 class="kpi-card__label">{% trans %}Illustrative cost{% endtrans %}</h3>
+      <p class="kpi-card__value">
+        <span class="no-js-only">{{ fmt_eur(metrics.day_total_eur) }}</span>
+        <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_eur }}" data-final="{{ fmt_eur(metrics.day_total_eur) }}" data-kind="eur">{{ zero_eur }}</span>
+      </p>
+      <p class="kpi-card__hint">{% trans %}At your configured €/MWh rate (not a market bill){% endtrans %}</p>
+    </article>
+    {% endif %}
+  </div>
   {% if show_eur %}
-  <p class="kpi-big">
-    {% trans day_mwh=fmt_mwh(metrics.day_total_mwh), day_eur=fmt_eur(metrics.day_total_eur) %}
-    This day’s total: {{ day_mwh }} unused solar electricity ({{ day_eur }} at illustrative rates).
-    {% endtrans %}
-  </p>
-  <p class="kpi-secondary">
+  <p class="kpi-hero__secondary">
     {% trans eur_h=fmt_eur(metrics.mean_hourly_eur), mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
     About {{ eur_h }} per hour on average over the day ({{ mwh_h }}).
     {% endtrans %}
   </p>
   {% else %}
-  <p class="kpi-big">
-    {% trans day_mwh=fmt_mwh(metrics.day_total_mwh) %}
-    This day’s total: {{ day_mwh }} unused solar electricity for this calendar day.
-    {% endtrans %}
-  </p>
-  <p class="kpi-secondary">
+  <p class="kpi-hero__secondary">
     {% trans mwh_h=fmt_mwh(metrics.mean_hourly_mwh) %}
     About {{ mwh_h }} per hour on average over the day.
     {% endtrans %}
@@ -45,10 +55,16 @@
   <p class="kpi-sub">
     <strong>{% trans %}So far this year:{% endtrans %}</strong>
     {% if show_eur %}
-    {{ fmt_eur(metrics.ytd_eur) }}
+    <span class="kpi-ytd-anim">
+      <span class="no-js-only">{{ fmt_eur(metrics.ytd_eur) }}</span>
+      <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_eur }}" data-final="{{ fmt_eur(metrics.ytd_eur) }}" data-kind="eur">{{ zero_eur }}</span>
+    </span>
     {% trans %}in estimated waste.{% endtrans %}
     {% else %}
-    {{ fmt_mwh(metrics.ytd_mwh) }}
+    <span class="kpi-ytd-anim">
+      <span class="no-js-only">{{ fmt_mwh(metrics.ytd_mwh) }}</span>
+      <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_mwh }}" data-final="{{ fmt_mwh(metrics.ytd_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
+    </span>
     {% trans %}cumulative this year.{% endtrans %}
     {% endif %}
   </p>
@@ -184,38 +200,44 @@
   {% endtrans %}
 </p>
 
+<script src="{{ url_for('static', filename='kpi-animate.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
-  const ctx = document.getElementById('hourly-chart');
-  const labels = {{ chart_labels_json|safe }};
-  const data = {{ chart_mwh_json|safe }};
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: {{ _('Unused solar (MWh)')|tojson }},
-        data,
-        backgroundColor: 'rgba(244, 185, 66, 0.65)',
-        borderColor: 'rgba(244, 185, 66, 1)',
-        borderWidth: 1,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#e8eef5' } },
+  (function () {
+    const ctx = document.getElementById('hourly-chart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    const labels = {{ chart_labels_json|safe }};
+    const data = {{ chart_mwh_json|safe }};
+    const tick = '#5c6570';
+    const grid = '#e5dfd4';
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: {{ _('Unused solar (MWh)')|tojson }},
+          data,
+          backgroundColor: 'rgba(217, 119, 6, 0.55)',
+          borderColor: 'rgba(180, 83, 9, 0.95)',
+          borderWidth: 1,
+        }]
       },
-      scales: {
-        x: { ticks: { color: '#8b9cb3', maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } },
-        y: {
-          ticks: { color: '#8b9cb3' },
-          grid: { color: '#2a3545' },
-          title: { display: true, text: 'MWh', color: '#8b9cb3' },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: tick } },
+        },
+        scales: {
+          x: { ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: grid } },
+          y: {
+            ticks: { color: tick },
+            grid: { color: grid },
+            title: { display: true, text: 'MWh', color: tick },
+          },
         },
       },
-    },
-  });
+    });
+  })();
 </script>
 {% endblock %}

@@ -153,6 +153,9 @@ def day_view(day_str: str):
     chart_mwh = [float(h.mwh_unused) for h in metrics.hourly]
 
     homes = _city_analogy_households(metrics.day_total_mwh)
+    zero = Decimal("0")
+    zero_mwh = fmt_mwh(zero)
+    zero_eur = fmt_eur(zero)
 
     return render_template(
         "day.html",
@@ -176,6 +179,8 @@ def day_view(day_str: str):
         city_homes_equiv=homes,
         household_day_kwh=_household_day_kwh(),
         show_eur=show_eur,
+        zero_mwh=zero_mwh,
+        zero_eur=zero_eur,
     )
 
 
