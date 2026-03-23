@@ -25,7 +25,19 @@ Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restri
 
 ## `as_of` timestamp
 
-Optional SQL: `WASTED_SUN_PG_AS_OF_QUERY` returning one `timestamptz` / `timestamp`. Otherwise the app uses **end of `MAX(date_day)`** in Europe/Madrid.
+**Preferred (safest):** set **`WASTED_SUN_PG_AS_OF_META_TABLE`** and **`WASTED_SUN_PG_AS_OF_META_COLUMN`** to a single table and column (each a valid PostgreSQL identifier). The app runs `SELECT MAX(<column>) FROM <table>` with identifiers passed through `psycopg.sql.Identifier` — no raw SQL from env beyond those names.
+
+**Legacy:** **`WASTED_SUN_PG_AS_OF_QUERY`** may be a single **`SELECT …`** statement (no `;`, no SQL comments) returning one `timestamptz` / `timestamp`. It is validated with a conservative blocklist; do not use this if you can use the meta table/column pair instead. **Do not set both** the meta pair and `WASTED_SUN_PG_AS_OF_QUERY`.
+
+If neither is configured, the app uses **end of `MAX(date_day)`** in Europe/Madrid.
+
+## Table and column names
+
+`WASTED_SUN_PG_TABLE` may be **`schema.table`** or a single identifier. **`WASTED_SUN_PG_COL_*`** values must be plain identifiers (letters, digits, underscore; not reserved injection patterns). All are validated before use.
+
+## Security note
+
+Environment-driven SQL is limited to validated identifiers and, for `WASTED_SUN_PG_AS_OF_QUERY`, a restricted `SELECT`-only pattern. **`PLAUSIBLE_DOMAIN`** and **`PLAUSIBLE_SCRIPT_URL`** are validated at startup (hostname / `https?` script URL only).
 
 ## Table name
 

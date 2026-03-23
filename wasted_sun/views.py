@@ -18,6 +18,7 @@ from flask import (
 from flask_babel import gettext as _
 
 from wasted_sun.data.base import get_provider
+from wasted_sun.exceptions import ConfigurationError
 from wasted_sun.formatting import fmt_decimal, fmt_eur, fmt_int, fmt_mwh
 from wasted_sun.models import DayNotFoundError
 
@@ -88,7 +89,14 @@ def day_view(day_str: str):
     if day > today:
         return render_template("error.html", message=_("No data for future dates.")), 404
 
-    prov = _provider()
+    try:
+        prov = _provider()
+    except ConfigurationError:
+        return render_template(
+            "error.html",
+            message=_("Invalid database configuration. Check environment variables."),
+        ), 503
+
     try:
         earliest = prov.earliest_date()
     except RuntimeError:

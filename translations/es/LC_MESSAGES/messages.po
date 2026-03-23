@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wasted-sun 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-23 15:49+0100\n"
+"POT-Creation-Date: 2026-03-23 15:56+0100\n"
 "PO-Revision-Date: 2026-03-23 15:30+0100\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -16,27 +16,32 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:85
+#: wasted_sun/views.py:86
 msgid "Invalid date."
 msgstr "Fecha no válida."
 
-#: wasted_sun/views.py:89
+#: wasted_sun/views.py:90
 msgid "No data for future dates."
 msgstr "No hay datos para fechas futuras."
 
-#: wasted_sun/views.py:95
+#: wasted_sun/views.py:97
+msgid "Invalid database configuration. Check environment variables."
+msgstr ""
+"Configuración de base de datos no válida. Revisa las variables de entorno."
+
+#: wasted_sun/views.py:103
 msgid "No energy data loaded yet."
 msgstr "Aún no hay datos de energía cargados."
 
-#: wasted_sun/views.py:97
+#: wasted_sun/views.py:105
 msgid "No data before coverage starts."
 msgstr "No hay datos anteriores al inicio de la serie."
 
-#: wasted_sun/views.py:102
+#: wasted_sun/views.py:110
 msgid "No data for this date."
 msgstr "No hay datos para esta fecha."
 
-#: wasted_sun/views.py:115
+#: wasted_sun/views.py:123
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
@@ -46,7 +51,7 @@ msgstr ""
 "electricidad solar no utilizada el %(day)s — %(ytd)s acumulados este año."
 " %(url)s"
 
-#: wasted_sun/views.py:125
+#: wasted_sun/views.py:133
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(mwh_h)s per hour on average in unused solar "
@@ -291,21 +296,70 @@ msgstr ""
 "    "
 
 #: wasted_sun/templates/day.html:126
-msgid "About"
-msgstr "Sobre"
+msgid "Credits"
+msgstr "Créditos"
 
 #: wasted_sun/templates/day.html:128
 msgid ""
 "\n"
-"    Built by Enrique Tasa, Head of Technology at Octopus Energy Spain.\n"
+"    This site was directly inspired by\n"
 "    "
 msgstr ""
 "\n"
-"    Creado por Enrique Tasa, Director de Tecnología en Octopus Energy "
-"España.\n"
+"    Este sitio se inspiró directamente en\n"
 "    "
 
-#: wasted_sun/templates/day.html:135
+#: wasted_sun/templates/day.html:131
+msgid "Wasted Wind"
+msgstr "Wasted Wind"
+
+#: wasted_sun/templates/day.html:132
+msgid ""
+"\n"
+"    a data project by Robin Hawkes about wasted wind energy in Great "
+"Britain. I am grateful for that work as a model for explaining curtailed "
+"renewables in a clear, public-facing way.\n"
+"    "
+msgstr ""
+"\n"
+"    un proyecto de datos de Robin Hawkes sobre energía eólica "
+"desperdiciada en Gran Bretaña. Le agradezco ese trabajo como modelo para "
+"explicar renovables vertidas de forma clara y accesible.\n"
+"    "
+
+#: wasted_sun/templates/day.html:139
+msgid "About"
+msgstr "Sobre"
+
+#: wasted_sun/templates/day.html:141
+msgid ""
+"\n"
+"    I built Wasted Sun as a private individual. It is not an official "
+"Octopus Energy product, website, or communication.\n"
+"    "
+msgstr ""
+"\n"
+"    Creé Sol desperdiciado como particular. No es un producto, sitio web "
+"ni comunicación oficial de Octopus Energy.\n"
+"    "
+
+#: wasted_sun/templates/day.html:146
+msgid ""
+"\n"
+"    I care a great deal about this topic in part because of my role as "
+"Head of Technology at Octopus Energy Spain — but except where stated "
+"otherwise, the analysis and opinions here are mine alone and do not "
+"represent my employer.\n"
+"    "
+msgstr ""
+"\n"
+"    Me importa mucho este tema en parte por mi trabajo como director de "
+"Tecnología en Octopus Energy España; salvo que se diga lo contrario, el "
+"análisis y las opiniones aquí son solo mías y no representan a mi empleador."
+"\n"
+"    "
+
+#: wasted_sun/templates/day.html:153
 msgid ""
 "\n"
 "  Figures are estimates for public understanding, not official Red "
@@ -317,7 +371,19 @@ msgstr ""
 "oficiales de Red Eléctrica ni del Gobierno.\n"
 "  "
 
-#: wasted_sun/templates/day.html:150
+#: wasted_sun/templates/day.html:158
+msgid ""
+"\n"
+"  This is a personal side project by Enrique Tasa and is not endorsed by "
+"Octopus Energy.\n"
+"  "
+msgstr ""
+"\n"
+"  Es un proyecto personal de Enrique Tasa y no cuenta con el respaldo de "
+"Octopus Energy.\n"
+"  "
+
+#: wasted_sun/templates/day.html:173
 msgid "Unused solar (MWh)"
 msgstr "Solar no utilizado (MWh)"
 
@@ -367,5 +433,18 @@ msgstr "Volver a hoy"
 #~ "elegido, mismo huso. El titular “por "
 #~ "hora” usa la media de los\n"
 #~ "    valores horarios de ese día.\n"
+#~ "    "
+
+#~ msgid ""
+#~ "\n"
+#~ "    Built by Enrique Tasa, Head of"
+#~ " Technology at Octopus Energy Spain.\n"
+#~ ""
+#~ "    "
+#~ msgstr ""
+#~ "\n"
+#~ "    Creado por Enrique Tasa, Director"
+#~ " de Tecnología en Octopus Energy "
+#~ "España.\n"
 #~ "    "
 

@@ -62,3 +62,7 @@ Use **`SESSION_COOKIE_SECURE=false`** when testing over **plain HTTP** (e.g. loc
 On [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform), connect the repo or container, set **HTTP port** `8080`, add a **`/health`** HTTP health check if the platform supports it, and configure environment variables (`SECRET_KEY`, `BASE_URL`, `DATABASE_URL`, etc.). Use a **trusted source** or **VPC** connection to Postgres when possible.
 
 See [DATA_CONTRACT.md](DATA_CONTRACT.md) for the expected SQL schema and [`.env.example`](.env.example) for all options.
+
+## Configuration safety
+
+Postgres table/column names from the environment are validated; optional `WASTED_SUN_PG_AS_OF_QUERY` must be a single `SELECT` without semicolons or comments. Prefer **`WASTED_SUN_PG_AS_OF_META_TABLE`** + **`WASTED_SUN_PG_AS_OF_META_COLUMN`** for “as of” freshness. Plausible analytics env vars are validated at startup.

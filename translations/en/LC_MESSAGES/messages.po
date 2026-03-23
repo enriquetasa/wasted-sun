@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-03-23 15:49+0100\n"
+"POT-Creation-Date: 2026-03-23 15:56+0100\n"
 "PO-Revision-Date: 2026-03-23 15:06+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,34 +18,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:85
+#: wasted_sun/views.py:86
 msgid "Invalid date."
 msgstr ""
 
-#: wasted_sun/views.py:89
+#: wasted_sun/views.py:90
 msgid "No data for future dates."
 msgstr ""
 
-#: wasted_sun/views.py:95
+#: wasted_sun/views.py:97
+msgid "Invalid database configuration. Check environment variables."
+msgstr ""
+
+#: wasted_sun/views.py:103
 msgid "No energy data loaded yet."
 msgstr ""
 
-#: wasted_sun/views.py:97
+#: wasted_sun/views.py:105
 msgid "No data before coverage starts."
 msgstr ""
 
-#: wasted_sun/views.py:102
+#: wasted_sun/views.py:110
 msgid "No data for this date."
 msgstr ""
 
-#: wasted_sun/views.py:115
+#: wasted_sun/views.py:123
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(eur_h)s per hour on average in unused solar "
 "electricity on %(day)s — %(ytd)s so far this year. %(url)s"
 msgstr ""
 
-#: wasted_sun/views.py:125
+#: wasted_sun/views.py:133
 #, python-format
 msgid ""
 "Spain (peninsula) wastes %(mwh_h)s per hour on average in unused solar "
@@ -232,17 +236,52 @@ msgid ""
 msgstr ""
 
 #: wasted_sun/templates/day.html:126
-msgid "About"
+msgid "Credits"
 msgstr ""
 
 #: wasted_sun/templates/day.html:128
 msgid ""
 "\n"
-"    Built by Enrique Tasa, Head of Technology at Octopus Energy Spain.\n"
+"    This site was directly inspired by\n"
 "    "
 msgstr ""
 
-#: wasted_sun/templates/day.html:135
+#: wasted_sun/templates/day.html:131
+msgid "Wasted Wind"
+msgstr ""
+
+#: wasted_sun/templates/day.html:132
+msgid ""
+"\n"
+"    a data project by Robin Hawkes about wasted wind energy in Great "
+"Britain. I am grateful for that work as a model for explaining curtailed "
+"renewables in a clear, public-facing way.\n"
+"    "
+msgstr ""
+
+#: wasted_sun/templates/day.html:139
+msgid "About"
+msgstr ""
+
+#: wasted_sun/templates/day.html:141
+msgid ""
+"\n"
+"    I built Wasted Sun as a private individual. It is not an official "
+"Octopus Energy product, website, or communication.\n"
+"    "
+msgstr ""
+
+#: wasted_sun/templates/day.html:146
+msgid ""
+"\n"
+"    I care a great deal about this topic in part because of my role as "
+"Head of Technology at Octopus Energy Spain — but except where stated "
+"otherwise, the analysis and opinions here are mine alone and do not "
+"represent my employer.\n"
+"    "
+msgstr ""
+
+#: wasted_sun/templates/day.html:153
 msgid ""
 "\n"
 "  Figures are estimates for public understanding, not official Red "
@@ -250,7 +289,15 @@ msgid ""
 "  "
 msgstr ""
 
-#: wasted_sun/templates/day.html:150
+#: wasted_sun/templates/day.html:158
+msgid ""
+"\n"
+"  This is a personal side project by Enrique Tasa and is not endorsed by "
+"Octopus Energy.\n"
+"  "
+msgstr ""
+
+#: wasted_sun/templates/day.html:173
 msgid "Unused solar (MWh)"
 msgstr ""
 
@@ -279,6 +326,14 @@ msgstr ""
 #~ " hour” headline uses the mean of "
 #~ "the\n"
 #~ "    hourly values for that day.\n"
+#~ "    "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "    Built by Enrique Tasa, Head of"
+#~ " Technology at Octopus Energy Spain.\n"
+#~ ""
 #~ "    "
 #~ msgstr ""
 

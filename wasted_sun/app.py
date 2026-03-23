@@ -6,6 +6,7 @@ from flask import Flask, session
 from flask_babel import Babel, get_locale as babel_get_locale
 
 from wasted_sun.config import get_config
+from wasted_sun.sql_guard import validate_plausible_domain, validate_plausible_script_url
 from wasted_sun.views import bp as main_bp
 
 
@@ -39,6 +40,15 @@ def create_app() -> Flask:
         "HOUSEHOLD_DAY_KWH",
         os.environ.get("HOUSEHOLD_DAY_KWH", "12"),
     )
+
+    try:
+        pd = validate_plausible_domain(app.config.get("PLAUSIBLE_DOMAIN") or "")
+        app.config["PLAUSIBLE_DOMAIN"] = pd
+        ps = validate_plausible_script_url(app.config.get("PLAUSIBLE_SCRIPT_URL") or "")
+        if ps:
+            app.config["PLAUSIBLE_SCRIPT_URL"] = ps
+    except ValueError as e:
+        raise RuntimeError(f"Invalid analytics configuration: {e}") from e
 
     babel = Babel()
 

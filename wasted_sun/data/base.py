@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from flask import Flask
 
+from wasted_sun.exceptions import ConfigurationError
 from wasted_sun.models import DailyMetrics
 
 
@@ -32,13 +33,18 @@ def get_provider(app: Flask):
             eur_per_mwh=eur,
             qh_slots=qh_slots,
         )
-    return PostgresMetricsProvider(
-        dsn=dsn,
-        timezone=cfg["TIMEZONE"],
-        table=cfg["PG_TABLE"],
-        date_col=cfg["PG_COL_DATE_DAY"],
-        total_mwh_col=cfg["PG_COL_TOTAL_MWH"],
-        as_of_query=cfg.get("PG_AS_OF_QUERY") or None,
-        eur_per_mwh=eur,
-        qh_slots=qh_slots,
-    )
+    try:
+        return PostgresMetricsProvider(
+            dsn=dsn,
+            timezone=cfg["TIMEZONE"],
+            table=cfg["PG_TABLE"],
+            date_col=cfg["PG_COL_DATE_DAY"],
+            total_mwh_col=cfg["PG_COL_TOTAL_MWH"],
+            as_of_query=cfg.get("PG_AS_OF_QUERY") or None,
+            as_of_meta_table=cfg.get("PG_AS_OF_META_TABLE") or None,
+            as_of_meta_column=cfg.get("PG_AS_OF_META_COLUMN") or None,
+            eur_per_mwh=eur,
+            qh_slots=qh_slots,
+        )
+    except ValueError as e:
+        raise ConfigurationError(str(e)) from e

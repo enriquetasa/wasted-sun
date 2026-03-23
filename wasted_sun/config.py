@@ -33,6 +33,9 @@ class Config:
         "WASTED_SUN_PG_AS_OF_QUERY",
         "",
     ).strip()
+    # Safer than raw SQL: MAX(column) from table (each part validated; schema.table allowed).
+    PG_AS_OF_META_TABLE = os.environ.get("WASTED_SUN_PG_AS_OF_META_TABLE", "").strip()
+    PG_AS_OF_META_COLUMN = os.environ.get("WASTED_SUN_PG_AS_OF_META_COLUMN", "").strip()
 
 
 class DevelopmentConfig(Config):

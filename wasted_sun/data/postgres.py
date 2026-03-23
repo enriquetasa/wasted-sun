@@ -9,7 +9,18 @@ from psycopg import sql
 from psycopg.rows import dict_row
 
 from wasted_sun.models import DailyMetrics, DayNotFoundError, mean_hourly_from_totals
+from wasted_sun.sql_guard import (
+    validate_as_of_select,
+    validate_pg_identifier,
+    validate_pg_qualified_table,
+    validate_qh_slots,
+)
 from wasted_sun.timeseries import merge_qh_across_rows, qh_series_to_hourly_points
+
+
+def _qualified_sql_identifier(qualified_name: str) -> sql.Identifier:
+    parts = qualified_name.split(".")
+    return sql.Identifier(*parts)
 
 
 class PostgresMetricsProvider:
@@ -26,20 +37,49 @@ class PostgresMetricsProvider:
         date_col: str,
         total_mwh_col: str,
         as_of_query: str | None,
+        as_of_meta_table: str | None,
+        as_of_meta_column: str | None,
         eur_per_mwh: Decimal | None,
         qh_slots: int = 100,
     ) -> None:
         self._dsn = dsn
         self._tz = timezone
-        self._table = table
-        self._date_col = date_col
-        self._total_mwh_col = total_mwh_col
-        self._as_of_query = as_of_query
+        self._table = validate_pg_qualified_table(table, label="WASTED_SUN_PG_TABLE")
+        self._date_col = validate_pg_identifier(date_col, label="WASTED_SUN_PG_COL_DATE_DAY")
+        self._total_mwh_col = validate_pg_identifier(
+            total_mwh_col, label="WASTED_SUN_PG_COL_TOTAL_MWH"
+        )
+        self._qh_slots = validate_qh_slots(qh_slots)
         self._eur_per_mwh = eur_per_mwh
-        self._qh_slots = qh_slots
+
+        self._as_of_meta_table: str | None = None
+        self._as_of_meta_column: str | None = None
+        self._as_of_query: str | None = None
+
+        mt = (as_of_meta_table or "").strip()
+        mc = (as_of_meta_column or "").strip()
+        aq = (as_of_query or "").strip() if as_of_query else ""
+
+        if mt or mc:
+            if not mt or not mc:
+                raise ValueError(
+                    "Set both as_of_meta_table and as_of_meta_column, or neither"
+                )
+            self._as_of_meta_table = validate_pg_qualified_table(
+                mt, label="WASTED_SUN_PG_AS_OF_META_TABLE"
+            )
+            self._as_of_meta_column = validate_pg_identifier(
+                mc, label="WASTED_SUN_PG_AS_OF_META_COLUMN"
+            )
+            if aq:
+                raise ValueError(
+                    "Do not set WASTED_SUN_PG_AS_OF_QUERY together with meta as_of table/column"
+                )
+        elif aq:
+            self._as_of_query = validate_as_of_select(aq)
 
     def _tbl(self) -> sql.Identifier:
-        return sql.Identifier(self._table)
+        return _qualified_sql_identifier(self._table)
 
     def _dc(self) -> sql.Identifier:
         return sql.Identifier(self._date_col)
@@ -80,6 +120,22 @@ class PostgresMetricsProvider:
         return Decimal(str(row["s"]))
 
     def _fetch_as_of(self, conn: psycopg.Connection) -> datetime:
+        if self._as_of_meta_table and self._as_of_meta_column:
+            t = _qualified_sql_identifier(self._as_of_meta_table)
+            c = sql.Identifier(self._as_of_meta_column)
+            q = sql.SQL("SELECT MAX({c}) AS ts FROM {t}").format(c=c, t=t)
+            with conn.cursor() as cur:
+                cur.execute(q)
+                row = cur.fetchone()
+            if row and row[0] is not None:
+                v = row[0]
+                if isinstance(v, datetime):
+                    if v.tzinfo is None:
+                        return v.replace(tzinfo=self._tz)
+                    return v.astimezone(self._tz)
+                if isinstance(v, date):
+                    return datetime.combine(v, time(23, 59, 59), tzinfo=self._tz)
+
         if self._as_of_query:
             with conn.cursor() as cur:
                 cur.execute(self._as_of_query)
@@ -122,7 +178,6 @@ class PostgresMetricsProvider:
             day, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
         )
 
-        # Prefer summed quarter-hours for the headline day total; YTD uses total_mwh from SQL.
         day_mwh = day_mwh_from_qh
         ytd_eur = (
             (ytd_mwh * self._eur_per_mwh).quantize(Decimal("0.01"))

@@ -123,10 +123,28 @@
 </section>
 
 <section class="prose">
+  <h2>{% trans %}Credits{% endtrans %}</h2>
+  <p>
+    {% trans %}
+    This site was directly inspired by
+    {% endtrans %}
+    <a href="https://wastedwind.energy/" rel="noopener noreferrer">{% trans %}Wasted Wind{% endtrans %}</a>,
+    {% trans %}
+    a data project by Robin Hawkes about wasted wind energy in Great Britain. I am grateful for that work as a model for explaining curtailed renewables in a clear, public-facing way.
+    {% endtrans %}
+  </p>
+</section>
+
+<section class="prose">
   <h2>{% trans %}About{% endtrans %}</h2>
   <p>
     {% trans %}
-    Built by Enrique Tasa, Head of Technology at Octopus Energy Spain.
+    I built Wasted Sun as a private individual. It is not an official Octopus Energy product, website, or communication.
+    {% endtrans %}
+  </p>
+  <p>
+    {% trans %}
+    I care a great deal about this topic in part because of my role as Head of Technology at Octopus Energy Spain — but except where stated otherwise, the analysis and opinions here are mine alone and do not represent my employer.
     {% endtrans %}
   </p>
 </section>
@@ -134,6 +152,11 @@
 <p class="disclaimer">
   {% trans %}
   Figures are estimates for public understanding, not official Red Eléctrica or government statistics.
+  {% endtrans %}
+</p>
+<p class="disclaimer">
+  {% trans %}
+  This is a personal side project by Enrique Tasa and is not endorsed by Octopus Energy.
   {% endtrans %}
 </p>
 
