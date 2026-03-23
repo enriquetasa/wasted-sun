@@ -27,7 +27,7 @@ Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restri
 
 **Preferred (safest):** set **`WASTED_SUN_PG_AS_OF_META_TABLE`** and **`WASTED_SUN_PG_AS_OF_META_COLUMN`** to a single table and column (each a valid PostgreSQL identifier). The app runs `SELECT MAX(<column>) FROM <table>` with identifiers passed through `psycopg.sql.Identifier` — no raw SQL from env beyond those names.
 
-**Legacy:** **`WASTED_SUN_PG_AS_OF_QUERY`** may be a single **`SELECT …`** statement (no `;`, no SQL comments) returning one `timestamptz` / `timestamp`. It is validated with a conservative blocklist; do not use this if you can use the meta table/column pair instead. **Do not set both** the meta pair and `WASTED_SUN_PG_AS_OF_QUERY`.
+**Legacy (operator-only):** **`WASTED_SUN_PG_AS_OF_QUERY`** may be a single **`SELECT …`** statement (no `;`, no SQL comments) returning one `timestamptz` / `timestamp`. It is validated with a conservative blocklist but still accepts arbitrary SQL—treat it as a **privileged, operator-only** setting and never expose it to end users or untrusted input. Prefer the meta table/column pair above whenever possible. **Do not set both** the meta pair and `WASTED_SUN_PG_AS_OF_QUERY`.
 
 If neither is configured, the app uses **end of `MAX(date_day)`** in Europe/Madrid.
 
