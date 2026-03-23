@@ -18,15 +18,15 @@
 </nav>
 
 <section class="kpi-hero" aria-labelledby="kpi-headline">
-  <h1 id="kpi-headline" class="kpi-hero__title">{% trans %}Unused solar generation on the Spanish peninsula{% endtrans %}</h1>
+  <h1 id="kpi-headline" class="kpi-hero__title">{% trans %}Wasted solar generation on the Spanish peninsula{% endtrans %}</h1>
   <div class="kpi-hero__deck">
     <article class="kpi-card kpi-card--energy">
-      <h3 class="kpi-card__label">{% trans %}This day’s total{% endtrans %}</h3>
+      <h3 class="kpi-card__label">{% trans %}Today's total{% endtrans %}</h3>
       <p class="kpi-card__value">
         <span class="no-js-only">{{ fmt_mwh(metrics.day_total_mwh) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_mwh }}" data-final="{{ fmt_mwh(metrics.day_total_mwh) }}" data-kind="mwh">{{ zero_mwh }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}Solar output the system could not use that day—measured in MWh.{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}Solar output the grid could not use that day—measured in MWh.{% endtrans %}</p>
     </article>
     {% if show_eur %}
     <article class="kpi-card kpi-card--money">
@@ -35,7 +35,7 @@
         <span class="no-js-only">{{ fmt_eur(metrics.day_total_eur) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_eur }}" data-final="{{ fmt_eur(metrics.day_total_eur) }}" data-kind="eur">{{ zero_eur }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}This site’s €/MWh × unused MWh—not a bill or market price, but a serious order of magnitude.{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}This site's €/MWh unused MWh—not a bill or market price, but a serious order of magnitude.{% endtrans %}</p>
     </article>
     {% endif %}
   </div>
@@ -76,7 +76,7 @@
 </div>
 
 <section class="share-row">
-  <h2>{% trans %}Share if the scale should get more attention{% endtrans %}</h2>
+  <h2>{% trans %}Share if this should get more attention{% endtrans %}</h2>
   <ul class="share-links">
     <li>
     <a class="share-btn share-btn--linkedin" href="{{ share_linkedin }}" rel="noopener noreferrer" target="_blank">
@@ -93,38 +93,37 @@
     <li>
     <a class="share-btn share-btn--x" href="{{ share_x }}" rel="noopener noreferrer" target="_blank">
       <svg class="share-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      <span>{% trans %}X{% endtrans %}</span>
+      <span>{% trans %}X (formerly Twitter){% endtrans %}</span>
     </a>
     </li>
   </ul>
 </section>
 
 <section class="prose">
-  <h2>{% trans %}Paying twice for the same electricity{% endtrans %}</h2>
+  <h2>{% trans %}This waste increases energy pricing for all{% endtrans %}</h2>
   <p>
     {% trans %}
-    On sunny hours the peninsula often produces more solar than the local grid can absorb. That energy
-    may go unused while other plants remain in the mix—so consumers can pay for flexibility and system
-    constraints twice over. It is measurable, costly, and largely avoidable with better infrastructure
+    On sunny hours the Spanish peninsular grid often produces more solar than the local grid can absorb. That energy
+    may go unused while other (more polluting, more expensive) sources remain in the mix: so the current system setup makes the consumer pay more. It is measurable, costly, and largely avoidable with better infrastructure
     and market design.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    <strong>What would help?</strong> Stronger grids and storage over time, and price signals that reward
-    using clean power when it is abundant. That reduces waste, eases bills, and puts scarce clean
+    <strong>What would help?</strong> Stronger grids and increased storage (that's batteries!) over time, and price signals that reward
+    using clean power when it is abundant (during solar hours). That reduces waste, eases bills, and puts scarce clean
     generation to work—policy choices we already understand.
     {% endtrans %}
   </p>
 </section>
 
 <section class="prose">
-  <h2>{% trans %}City-sized picture{% endtrans %}</h2>
+  <h2>{% trans %}The waste put into perspective{% endtrans %}</h2>
   <p>
     {% trans homes=fmt_int(city_homes_equiv), kwh=household_day_kwh %}
-    Today’s unused solar total is in the ballpark of the daily electricity of about
+    Today's unused solar total is in the ballpark of the daily electricity of about
     <strong>{{ homes }}</strong> typical homes, using an illustrative {{ kwh }} kWh per home per day
-    for scale (not a census count—see methodology).
+    for scale (not a census count — see methodology).
     {% endtrans %}
   </p>
 </section>
@@ -134,24 +133,23 @@
   <p>
     {% trans %}
     Quarter-hourly unused solar (MWh) is derived from Red Eléctrica de España (REE) data, processed in
-    a separate pipeline and stored in this project’s database: each row is keyed by date_day with
-    qh_1_mwh through qh_100_mwh (15-minute buckets). Multiple rows for the same day are summed
+    a separate pipeline and stored in this project's database: each row is keyed by date with
+    15-minute segments of electricity wasted. Multiple rows for the same day are summed
     bucket-wise before display.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    The chart aggregates those quarter-hours into 24 hourly bars (Europe/Madrid calendar day). Any slots
+    The chart aggregates those quarter-hours into 24 hourly bars (Madrid calendar day). Any slots
     beyond the first 96 are folded into the last hour of the day. Day totals are the sum of all
-    quarter-hour values. “So far this year” uses SUM(total_mwh) across rows from 1 January through the
+    quarter-hour values. “So far this year” uses SUM(total_mwh) across rows from 1st January through the
     selected date. The average “per hour” figure is the mean of the 24 hourly bars (equivalently the
     day total divided by 24).
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    Euro amounts appear only when WASTED_SUN_EUR_PER_MWH is set; they apply a simple illustrative rate
-    × energy, not a market settlement—but they make clear that unused MWh are not economically neutral.
+    Euro amounts apply a simple illustrative rate to energy, not a market settlement—but they make clear that unused MWh are not economically neutral.
     {% endtrans %}
   </p>
   <h3>{% trans %}Household analogy{% endtrans %}</h3>
@@ -180,15 +178,9 @@
   <h2>{% trans %}About{% endtrans %}</h2>
   <p>
     {% trans %}
-    I built Wasted Sun as a private individual to put unused solar in plain sight. It is not an official
-    Octopus Energy product, website, or communication.
-    {% endtrans %}
-  </p>
-  <p>
-    {% trans %}
-    I care strongly about this topic, including through my role as Head of Technology at Octopus Energy
-    Spain—but unless stated otherwise, the analysis and opinions here are mine alone and do not represent
-    my employer.
+    I built Wasted Sun as a private individual to put wasted solar production in plain sight. I care strongly about this topic, including through my role as Head of Technology at Octopus Energy
+    Spain — but unless stated otherwise, the analysis and opinions here are mine alone and do not represent
+    my employer. It is not an official Octopus Energy product, website, or communication.
     {% endtrans %}
   </p>
 </section>
@@ -201,7 +193,7 @@
 </p>
 <p class="disclaimer">
   {% trans %}
-  This is a personal side project by Enrique Tasa and is not endorsed by Octopus Energy.
+  This is a personal side project by <a href="https://github.com/enriquetasa" rel="noopener noreferrer">Enrique Tasa</a>and is not endorsed by Octopus Energy.
   {% endtrans %}
 </p>
 
