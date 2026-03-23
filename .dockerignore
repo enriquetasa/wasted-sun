@@ -1,0 +1,11 @@
+.venv
+venv
+.git
+.cursor
+__pycache__
+*.pyc
+.pytest_cache
+.env
+*.md
+tests
+messages.pot
