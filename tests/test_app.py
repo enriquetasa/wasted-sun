@@ -21,7 +21,7 @@ def test_day_page_spanish_default(client):
     assert r.status_code == 200
     assert b"lang=\"es\"" in r.data
     assert (
-        b"Sol desperdiciado" in r.data
+        b"sol desperdiciada" in r.data.lower()
         or b"pen\xednsula" in r.data
         or b"peninsul" in r.data.lower()
     )
@@ -85,7 +85,7 @@ def test_lang_query_param_switches_locale(client):
 
     r = client.get(f"/{d.isoformat()}/?lang=es")
     assert r.status_code == 200
-    assert b"Sol desperdiciado" in r.data
+    assert b"sol desperdiciada" in r.data.lower()
 
 
 def test_set_locale_invalid_lang_redirects(client):
