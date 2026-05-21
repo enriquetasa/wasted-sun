@@ -25,8 +25,8 @@ from wasted_sun.models import DayNotFoundError
 bp = Blueprint("main", __name__)
 
 
-def _today() -> date:
-    return datetime.now(current_app.config["TIMEZONE"]).date()
+def _latest_data_day() -> date:
+    return _provider().latest_available_date()
 
 
 def _provider():
@@ -78,7 +78,19 @@ def health() -> Response:
 
 @bp.route("/")
 def index():
-    return redirect(url_for("main.day_view", day_str=_today().isoformat()), code=302)
+    try:
+        latest = _latest_data_day()
+    except ConfigurationError:
+        return render_template(
+            "error.html",
+            message=_("Invalid database configuration. Check environment variables."),
+        ), 503
+    except RuntimeError:
+        return render_template("error.html", message=_("No energy data loaded yet.")), 503
+    except Exception:
+        current_app.logger.exception("Failed to resolve latest data date")
+        return render_template("error.html", message=_("Database temporarily unavailable.")), 503
+    return redirect(url_for("main.day_view", day_str=latest.isoformat()), code=302)
 
 
 @bp.route("/<day_str>/")
@@ -88,10 +100,6 @@ def day_view(day_str: str):
     except ValueError:
         return render_template("error.html", message=_("Invalid date.")), 404
 
-    today = _today()
-    if day > today:
-        return render_template("error.html", message=_("No data for future dates.")), 404
-
     try:
         prov = _provider()
     except ConfigurationError:
@@ -99,6 +107,17 @@ def day_view(day_str: str):
             "error.html",
             message=_("Invalid database configuration. Check environment variables."),
         ), 503
+
+    try:
+        latest_day = prov.latest_available_date()
+    except RuntimeError:
+        return render_template("error.html", message=_("No energy data loaded yet.")), 503
+    except Exception:
+        current_app.logger.exception("Failed to resolve latest data date")
+        return render_template("error.html", message=_("Database temporarily unavailable.")), 503
+
+    if day > latest_day:
+        return render_template("error.html", message=_("No data for future dates.")), 404
 
     try:
         metrics = prov.get_daily_metrics(day)
@@ -121,7 +140,7 @@ def day_view(day_str: str):
     prev_day = day - timedelta(days=1)
     next_day = day + timedelta(days=1)
     prev_ok = prev_day >= earliest
-    next_ok = next_day <= today
+    next_ok = next_day <= latest_day
 
     share_path = f"{day.isoformat()}/"
     share_url = f"{current_app.config['BASE_URL'].rstrip('/')}/{share_path}"
@@ -169,7 +188,7 @@ def day_view(day_str: str):
         "day.html",
         metrics=metrics,
         day=day,
-        today=today,
+        latest_day=latest_day,
         prev_day=prev_day,
         next_day=next_day,
         prev_ok=prev_ok,

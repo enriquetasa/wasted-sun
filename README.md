@@ -14,7 +14,7 @@ pybabel compile -d translations   # if you edit .po files
 flask --app wasted_sun.app:create_app --debug run
 ```
 
-Open `/` (redirects to today) or `/2024-06-15/`.
+Open `/` (redirects to the latest date in the data) or `/2024-06-15/`.
 
 ## Tests
 

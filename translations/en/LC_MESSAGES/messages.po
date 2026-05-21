@@ -93,6 +93,14 @@ msgstr ""
 msgid "Today"
 msgstr ""
 
+#: wasted_sun/templates/day.html:17
+msgid "Latest"
+msgstr ""
+
+#: wasted_sun/templates/error.html:5
+msgid "Back to latest"
+msgstr ""
+
 #: wasted_sun/templates/day.html:21
 msgid "Wasted solar generation on the Spanish peninsula"
 msgstr ""

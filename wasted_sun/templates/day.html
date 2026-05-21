@@ -14,7 +14,7 @@
   {% else %}
   <button type="button" disabled title="{% trans %}No future data{% endtrans %}">+</button>
   {% endif %}
-  <a class="btn today-link" href="{{ url_for('main.day_view', day_str=today.isoformat()) }}">{% trans %}Today{% endtrans %}</a>
+  <a class="btn today-link" href="{{ url_for('main.day_view', day_str=latest_day.isoformat()) }}">{% trans %}Latest{% endtrans %}</a>
 </nav>
 
 <section class="kpi-hero" aria-labelledby="kpi-headline">

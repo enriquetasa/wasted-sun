@@ -64,14 +64,16 @@ class MockMetricsProvider:
     def earliest_date(self) -> date:
         return self._earliest
 
+    def latest_available_date(self) -> date:
+        return datetime.now(self._tz).date()
+
     def _day_seed(self, day: date) -> bytes:
         return f"wasted-sun-mock-{day.isoformat()}".encode()
 
     def _qh_for_day(self, day: date) -> list[Decimal]:
         if day < self._earliest:
             raise DayNotFoundError(day)
-        today = datetime.now(self._tz).date()
-        if day > today:
+        if day > self.latest_available_date():
             raise DayNotFoundError(day)
 
         qh: list[Decimal] = []

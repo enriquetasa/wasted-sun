@@ -97,6 +97,14 @@ msgstr "No hay datos futuros"
 msgid "Today"
 msgstr "Hoy"
 
+#: wasted_sun/templates/day.html:17
+msgid "Latest"
+msgstr "Último"
+
+#: wasted_sun/templates/error.html:5
+msgid "Back to latest"
+msgstr "Volver al último"
+
 #: wasted_sun/templates/day.html:21
 msgid "Wasted solar generation on the Spanish peninsula"
 msgstr "Generación solar desperdiciada en la península"

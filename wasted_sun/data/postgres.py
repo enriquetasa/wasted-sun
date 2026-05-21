@@ -100,6 +100,22 @@ class PostgresMetricsProvider:
         with psycopg.connect(self._dsn) as conn:
             return self._earliest_from_conn(conn)
 
+    def _latest_from_conn(self, conn: psycopg.Connection) -> date:
+        q = sql.SQL("SELECT MAX({dc}) AS d FROM {tbl}").format(dc=self._dc(), tbl=self._tbl())
+        with conn.cursor() as cur:
+            cur.execute(q)
+            row = cur.fetchone()
+        if not row or row[0] is None:
+            raise RuntimeError("wasted_sun: Postgres table is empty or MAX(date) is NULL")
+        v = row[0]
+        if isinstance(v, datetime):
+            return v.astimezone(self._tz).date()
+        return v
+
+    def latest_available_date(self) -> date:
+        with psycopg.connect(self._dsn) as conn:
+            return self._latest_from_conn(conn)
+
     def _fetch_rows_for_day(self, conn: psycopg.Connection, day: date) -> list[dict]:
         q = sql.SQL("SELECT * FROM {tbl} WHERE {dc} = %s").format(tbl=self._tbl(), dc=self._dc())
         with conn.cursor(row_factory=dict_row) as cur:
@@ -161,11 +177,10 @@ class PostgresMetricsProvider:
         return datetime.combine(d, time(23, 59, 59), tzinfo=self._tz)
 
     def get_daily_metrics(self, day: date) -> DailyMetrics:
-        today = datetime.now(self._tz).date()
-        if day > today:
-            raise DayNotFoundError(day)
-
         with psycopg.connect(self._dsn) as conn:
+            latest = self._latest_from_conn(conn)
+            if day > latest:
+                raise DayNotFoundError(day)
             earliest = self._earliest_from_conn(conn)
             rows = self._fetch_rows_for_day(conn, day)
             if not rows:

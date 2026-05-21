@@ -6,11 +6,12 @@ from wasted_sun.models import DailyMetrics
 from wasted_sun.views import _show_eur
 
 
-def test_index_redirects_to_today(client):
+def test_index_redirects_to_latest_available_day(client):
     r = client.get("/")
     assert r.status_code == 302
-    madrid_today = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
-    assert madrid_today in r.headers["Location"]
+    # Mock provider: latest date is calendar today (Europe/Madrid).
+    latest = datetime.now(ZoneInfo("Europe/Madrid")).date().isoformat()
+    assert latest in r.headers["Location"]
 
 
 def test_health(client):
@@ -78,7 +79,11 @@ def test_date_before_earliest_404(client):
 def test_error_page_has_back_link(client):
     r = client.get("/not-a-date/")
     assert r.status_code == 404
-    assert b"Back to today" in r.data or b"Volver a hoy" in r.data
+    assert (
+        b"Back to latest" in r.data
+        or b"Volver" in r.data
+        or b"ltimo" in r.data
+    )
 
 
 def test_lang_query_param_switches_locale(client):

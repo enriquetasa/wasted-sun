@@ -49,6 +49,7 @@ def test_cube_provider_daily_and_ytd(monkeypatch):
     day = date(2024, 6, 15)
     responses = [
         {"data": [{D_DATE: "2024-01-01"}]},
+        {"data": [{D_DATE: "2024-06-15"}]},
         {
             "data": [
                 {D_DATE: "2024-06-15", D_PERIOD: 1, D_MWH: 1, D_PRICE_ESP: 50},
@@ -56,7 +57,6 @@ def test_cube_provider_daily_and_ytd(monkeypatch):
             ]
         },
         {"data": [{D_DATE: "2024-01-01", D_MWH: 10, D_PRICE_ESP: 50}]},
-        {"data": [{D_DATE: "2024-06-15"}]},
     ]
     fake, calls = _fake_urlopen_factory(responses)
     tz = ZoneInfo("Europe/Madrid")
@@ -92,9 +92,9 @@ def test_cube_scope_or_when_both_lists():
     tz = ZoneInfo("Europe/Madrid")
     responses = [
         {"data": [{D_DATE: "2024-01-01"}]},
+        {"data": [{D_DATE: "2024-06-15"}]},
         {"data": [{D_DATE: "2024-06-15", D_PERIOD: 1, D_MWH: 1, D_PRICE_ESP: 1}]},
         {"data": []},
-        {"data": [{D_DATE: "2024-06-15"}]},
     ]
     fake, calls = _fake_urlopen_factory(responses)
     with patch("wasted_sun.data.cube.urlopen", fake):
@@ -128,6 +128,7 @@ def test_cube_scope_or_when_both_lists():
 def test_cube_provider_empty_day():
     responses = [
         {"data": [{D_DATE: "2024-01-01"}]},
+        {"data": [{D_DATE: "2024-06-15"}]},
         {"data": []},
     ]
     fake, _ = _fake_urlopen_factory(responses)

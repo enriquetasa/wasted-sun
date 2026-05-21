@@ -173,6 +173,7 @@ class CubeMetricsProvider:
         self._redispatch_codes = redispatch_codes
         self._restriction_type_codes = restriction_type_codes
         self._earliest: date | None = None
+        self._latest: date | None = None
         self._ytd_cache: dict[tuple[int, str], tuple[Decimal, Decimal]] = {}
 
     def _wasted_sun_filters(self) -> list[dict[str, Any]]:
@@ -270,6 +271,18 @@ class CubeMetricsProvider:
     def earliest_date(self) -> date:
         return self._ensure_earliest()
 
+    def _ensure_latest(self) -> date:
+        if self._latest is not None:
+            return self._latest
+        d = self._boundary_date(ascending=False)
+        if d is None:
+            raise RuntimeError("wasted_sun: Cube WastedEnergy has no DateDay values")
+        self._latest = d
+        return d
+
+    def latest_available_date(self) -> date:
+        return self._ensure_latest()
+
     def _sum_rows_mwh_eur(self, rows: list[dict]) -> tuple[Decimal, Decimal]:
         total_mwh = Decimal("0")
         total_eur = Decimal("0")
@@ -300,23 +313,18 @@ class CubeMetricsProvider:
         return datetime.combine(d, dt_time(23, 59, 59), tzinfo=self._tz)
 
     def get_daily_metrics(self, day: date) -> DailyMetrics:
-        today = datetime.now(self._tz).date()
-        if day > today:
-            raise DayNotFoundError(day)
-
         earliest = self._ensure_earliest()
-        if day < earliest:
+        latest = self._ensure_latest()
+        if day < earliest or day > latest:
             raise DayNotFoundError(day)
 
         rows = self._load_day_rows(day)
         if not rows:
             raise DayNotFoundError(day)
 
-        with ThreadPoolExecutor(max_workers=2) as pool:
+        with ThreadPoolExecutor(max_workers=1) as pool:
             ytd_future = pool.submit(self._ytd_mwh_eur, day)
-            latest_future = pool.submit(self._boundary_date, ascending=False)
             ytd_mwh, ytd_eur = ytd_future.result()
-            latest = latest_future.result()
         as_of = self._as_of_from_date(latest)
 
         qh_mwh, qh_eur_slots = merge_cube_rows(rows, self._qh_slots)
