@@ -46,6 +46,17 @@ def _city_analogy_households(day_mwh: Decimal) -> int:
     return int(equiv.to_integral_value())
 
 
+def _using_cube() -> bool:
+    prov = current_app.extensions.get("_metrics_provider")
+    return prov is not None and prov.__class__.__name__ == "CubeMetricsProvider"
+
+
+def _show_ytd() -> bool:
+    if _using_cube() and current_app.config.get("CUBE_SKIP_YTD"):
+        return False
+    return True
+
+
 def _show_eur(metrics=None) -> bool:
     rate = current_app.config.get("EUR_PER_MWH")
     if rate is not None and rate > 0:
@@ -109,17 +120,6 @@ def day_view(day_str: str):
         ), 503
 
     try:
-        latest_day = prov.latest_available_date()
-    except RuntimeError:
-        return render_template("error.html", message=_("No energy data loaded yet.")), 503
-    except Exception:
-        current_app.logger.exception("Failed to resolve latest data date")
-        return render_template("error.html", message=_("Database temporarily unavailable.")), 503
-
-    if day > latest_day:
-        return render_template("error.html", message=_("No data for future dates.")), 404
-
-    try:
         metrics = prov.get_daily_metrics(day)
     except DayNotFoundError:
         try:
@@ -136,6 +136,7 @@ def day_view(day_str: str):
         return render_template("error.html", message=_("Database temporarily unavailable.")), 503
 
     earliest = metrics.earliest_available_date
+    latest_day = metrics.latest_available_date
 
     prev_day = day - timedelta(days=1)
     next_day = day + timedelta(days=1)
@@ -146,19 +147,32 @@ def day_view(day_str: str):
     share_url = f"{current_app.config['BASE_URL'].rstrip('/')}/{share_path}"
 
     show_eur = _show_eur(metrics)
+    show_ytd = _show_ytd()
     if show_eur:
-        share_text = _(
-            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative ~%(day_eur)s "
-            "(site €/MWh). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
-        ) % {
-            "day": day.isoformat(),
-            "day_mwh": fmt_mwh(metrics.day_total_mwh),
-            "day_eur": fmt_eur(metrics.day_total_eur),
-            "eur_h": fmt_eur(metrics.mean_hourly_eur),
-            "ytd": fmt_eur(metrics.ytd_eur),
-            "url": share_url,
-        }
-    else:
+        if show_ytd:
+            share_text = _(
+                "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative ~%(day_eur)s "
+                "(site €/MWh). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
+            ) % {
+                "day": day.isoformat(),
+                "day_mwh": fmt_mwh(metrics.day_total_mwh),
+                "day_eur": fmt_eur(metrics.day_total_eur),
+                "eur_h": fmt_eur(metrics.mean_hourly_eur),
+                "ytd": fmt_eur(metrics.ytd_eur),
+                "url": share_url,
+            }
+        else:
+            share_text = _(
+                "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative ~%(day_eur)s "
+                "(site €/MWh). ~%(eur_h)s/h avg. %(url)s"
+            ) % {
+                "day": day.isoformat(),
+                "day_mwh": fmt_mwh(metrics.day_total_mwh),
+                "day_eur": fmt_eur(metrics.day_total_eur),
+                "eur_h": fmt_eur(metrics.mean_hourly_eur),
+                "url": share_url,
+            }
+    elif show_ytd:
         share_text = _(
             "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). "
             "~%(mwh_h)s/h avg. YTD: %(ytd)s. %(url)s"
@@ -167,6 +181,16 @@ def day_view(day_str: str):
             "day_mwh": fmt_mwh(metrics.day_total_mwh),
             "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
             "ytd": fmt_mwh(metrics.ytd_mwh),
+            "url": share_url,
+        }
+    else:
+        share_text = _(
+            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). "
+            "~%(mwh_h)s/h avg. %(url)s"
+        ) % {
+            "day": day.isoformat(),
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
             "url": share_url,
         }
 
@@ -204,6 +228,7 @@ def day_view(day_str: str):
         city_homes_equiv=homes,
         household_day_kwh=_household_day_kwh(),
         show_eur=show_eur,
+        show_ytd=show_ytd,
         zero_mwh=zero_mwh,
         zero_eur=zero_eur,
     )

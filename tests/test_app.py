@@ -110,6 +110,7 @@ def test_show_eur_when_cube_prices_without_flat_rate(app):
         mean_hourly_eur=Decimal("0"),
         as_of=datetime.now(ZoneInfo("Europe/Madrid")),
         earliest_available_date=date(2024, 1, 1),
+        latest_available_date=date(2024, 6, 15),
     )
     with app.app_context():
         assert _show_eur(metrics) is True

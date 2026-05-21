@@ -28,6 +28,9 @@ class Config:
         "WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES", ""
     ).strip()
     CUBE_HTTP_TIMEOUT_SEC = int(os.environ.get("WASTED_SUN_CUBE_HTTP_TIMEOUT_SEC", "90"))
+    # YTD loads the full year from Cube row-by-row; skip until Cube is fast enough.
+    CUBE_SKIP_YTD = _bool("WASTED_SUN_CUBE_SKIP_YTD", default=True)
+    CUBE_YTD_TIMEOUT_SEC = int(os.environ.get("WASTED_SUN_CUBE_YTD_TIMEOUT_SEC", "20"))
 
     # Plausible (optional)
     PLAUSIBLE_DOMAIN = os.environ.get("PLAUSIBLE_DOMAIN", "").strip()

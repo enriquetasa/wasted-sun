@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, time as dt_time, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -30,8 +30,9 @@ D_RESTRICTION = f"{CUBE}.RestrictionTypeCode"
 _DEFAULT_QH_SLOTS = 100
 _LOAD_PATH = "/cubejs-api/v1/load"
 _DEFAULT_TIMEOUT_SEC = 90
-_CONTINUE_WAIT_MAX = 45
-_CONTINUE_WAIT_SLEEP_SEC = 2.0
+_CONTINUE_WAIT_MAX = 20
+_CONTINUE_WAIT_SLEEP_SEC = 1.0
+_YTD_MONTH_WORKERS = 6
 
 
 def _decimal(value: Any) -> Decimal:
@@ -107,7 +108,12 @@ class CubeClient:
         self._token = api_token.strip()
         self._timeout = timeout_sec
 
-    def load(self, query: dict[str, Any]) -> list[dict]:
+    def load(
+        self,
+        query: dict[str, Any],
+        *,
+        max_continue_wait: int = _CONTINUE_WAIT_MAX,
+    ) -> list[dict]:
         body = json.dumps({"query": query}).encode("utf-8")
         # Cube REST docs use Authorization: TOKEN (raw secret). Prefix "Bearer " in
         # CUBE_API_TOKEN yourself only if your deployment requires it.
@@ -120,7 +126,7 @@ class CubeClient:
                 "Authorization": self._token,
             },
         )
-        for attempt in range(_CONTINUE_WAIT_MAX):
+        for attempt in range(max_continue_wait):
             try:
                 with urlopen(req, timeout=self._timeout) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
@@ -132,7 +138,7 @@ class CubeClient:
 
             err = payload.get("error")
             if err == "Continue wait":
-                if attempt + 1 >= _CONTINUE_WAIT_MAX:
+                if attempt + 1 >= max_continue_wait:
                     raise RuntimeError("Cube API still processing after continue-wait retries")
                 time.sleep(_CONTINUE_WAIT_SLEEP_SEC)
                 continue
@@ -143,6 +149,26 @@ class CubeClient:
                 raise RuntimeError("Cube API response missing data array")
             return data
         raise RuntimeError("Cube API continue-wait loop exhausted")
+
+
+def _month_ranges(y0: date, through: date) -> list[tuple[date, date]]:
+    """Inclusive month chunks from y0 through through."""
+    ranges: list[tuple[date, date]] = []
+    y, m = y0.year, y0.month
+    end_y, end_m = through.year, through.month
+    while (y, m) <= (end_y, end_m):
+        start = date(y, m, 1)
+        if m == 12:
+            month_end = date(y, 12, 31)
+        else:
+            month_end = date(y, m + 1, 1) - timedelta(days=1)
+        ranges.append((max(y0, start), min(through, month_end)))
+        if m == 12:
+            y += 1
+            m = 1
+        else:
+            m += 1
+    return ranges
 
 
 class CubeMetricsProvider:
@@ -158,6 +184,8 @@ class CubeMetricsProvider:
         restriction_type_codes: tuple[str, ...],
         qh_slots: int = _DEFAULT_QH_SLOTS,
         http_timeout_sec: int = _DEFAULT_TIMEOUT_SEC,
+        skip_ytd: bool = True,
+        ytd_timeout_sec: int = 20,
     ) -> None:
         if qh_slots < 1 or qh_slots > 200:
             raise ValueError("qh_slots must be between 1 and 200")
@@ -175,6 +203,8 @@ class CubeMetricsProvider:
         self._earliest: date | None = None
         self._latest: date | None = None
         self._ytd_cache: dict[tuple[int, str], tuple[Decimal, Decimal]] = {}
+        self._skip_ytd = skip_ytd
+        self._ytd_timeout_sec = ytd_timeout_sec
 
     def _wasted_sun_filters(self) -> list[dict[str, Any]]:
         """Row matches if RedispatchCode OR RestrictionTypeCode is in the allowlists."""
@@ -216,29 +246,21 @@ class CubeMetricsProvider:
             }
         )
 
-    def _load_ytd_rows(self, through: date) -> list[dict]:
-        y0 = date(through.year, 1, 1)
-        limit = 500_000
+    def _load_rows_between(self, start: date, end: date) -> list[dict]:
         use_flat = self._eur_per_mwh is not None and self._eur_per_mwh > 0
         dims = [D_DATE, D_MWH] if use_flat else [D_DATE, D_MWH, D_PRICE_ESP]
-        rows = self._client.load(
+        return self._client.load(
             {
                 "dimensions": dims,
                 "filters": [
-                    {"member": D_DATE, "operator": "gte", "values": [y0.isoformat()]},
-                    {"member": D_DATE, "operator": "lte", "values": [through.isoformat()]},
+                    {"member": D_DATE, "operator": "gte", "values": [start.isoformat()]},
+                    {"member": D_DATE, "operator": "lte", "values": [end.isoformat()]},
                     *self._wasted_sun_filters(),
                 ],
-                "limit": limit,
-            }
+                "limit": 100_000,
+            },
+            max_continue_wait=12,
         )
-        if len(rows) >= limit:
-            logger.warning(
-                "Cube YTD query returned %s rows (limit %s); totals may be truncated",
-                len(rows),
-                limit,
-            )
-        return rows
 
     def _boundary_date(self, *, ascending: bool) -> date | None:
         order = "asc" if ascending else "desc"
@@ -248,7 +270,8 @@ class CubeMetricsProvider:
                 "filters": self._wasted_sun_filters(),
                 "order": {D_DATE: order},
                 "limit": 1,
-            }
+            },
+            max_continue_wait=8,
         )
         if not rows:
             return None
@@ -299,11 +322,27 @@ class CubeMetricsProvider:
         return total_mwh, total_eur.quantize(Decimal("0.01"))
 
     def _ytd_mwh_eur(self, through: date) -> tuple[Decimal, Decimal]:
+        if self._skip_ytd:
+            return Decimal("0"), Decimal("0")
         key = (through.year, through.isoformat())
         if key in self._ytd_cache:
             return self._ytd_cache[key]
-        rows = self._load_ytd_rows(through)
-        totals = self._sum_rows_mwh_eur(rows)
+        y0 = date(through.year, 1, 1)
+        chunks = _month_ranges(y0, through)
+        all_rows: list[dict] = []
+        try:
+            with ThreadPoolExecutor(max_workers=min(_YTD_MONTH_WORKERS, len(chunks))) as pool:
+                futures = [pool.submit(self._load_rows_between, s, e) for s, e in chunks]
+                for fut in as_completed(futures, timeout=self._ytd_timeout_sec):
+                    all_rows.extend(fut.result())
+        except Exception as e:
+            logger.warning(
+                "Cube YTD incomplete or timed out after %ss (%s); showing zero YTD",
+                self._ytd_timeout_sec,
+                e,
+            )
+            return Decimal("0"), Decimal("0")
+        totals = self._sum_rows_mwh_eur(all_rows)
         self._ytd_cache[key] = totals
         return totals
 
@@ -322,9 +361,7 @@ class CubeMetricsProvider:
         if not rows:
             raise DayNotFoundError(day)
 
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            ytd_future = pool.submit(self._ytd_mwh_eur, day)
-            ytd_mwh, ytd_eur = ytd_future.result()
+        ytd_mwh, ytd_eur = self._ytd_mwh_eur(day)
         as_of = self._as_of_from_date(latest)
 
         qh_mwh, qh_eur_slots = merge_cube_rows(rows, self._qh_slots)
@@ -355,4 +392,5 @@ class CubeMetricsProvider:
             mean_hourly_eur=mean_eur,
             as_of=as_of,
             earliest_available_date=earliest,
+            latest_available_date=latest,
         )

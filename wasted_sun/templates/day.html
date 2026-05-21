@@ -52,6 +52,7 @@
     {% endtrans %}
   </p>
   {% endif %}
+  {% if show_ytd %}
   <p class="kpi-sub">
     <strong>{% trans %}So far this year:{% endtrans %}</strong>
     {% if show_eur %}
@@ -68,6 +69,7 @@
     {% trans %}in total.{% endtrans %}
     {% endif %}
   </p>
+  {% endif %}
   <p class="meta-asof">{% trans ts=metrics.as_of.strftime('%Y-%m-%d %H:%M %Z') %}Data as of {{ ts }}{% endtrans %}</p>
 </section>
 

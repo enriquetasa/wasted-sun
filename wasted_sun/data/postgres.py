@@ -215,4 +215,5 @@ class PostgresMetricsProvider:
             mean_hourly_eur=mean_eur,
             as_of=as_of,
             earliest_available_date=earliest,
+            latest_available_date=latest,
         )

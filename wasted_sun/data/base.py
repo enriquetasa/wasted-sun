@@ -46,6 +46,8 @@ def _cube_provider(cfg, *, api_url: str, token: str, eur, qh_slots: int):
             restriction_type_codes=restriction,
             qh_slots=qh_slots,
             http_timeout_sec=timeout,
+            skip_ytd=bool(cfg.get("CUBE_SKIP_YTD")),
+            ytd_timeout_sec=int(cfg.get("CUBE_YTD_TIMEOUT_SEC", 20)),
         )
     except ValueError as e:
         raise ConfigurationError(str(e)) from e

@@ -15,6 +15,7 @@ from wasted_sun.data.cube import (
     D_PRICE_ESP,
     CubeClient,
     CubeMetricsProvider,
+    _month_ranges,
     merge_cube_rows,
 )
 from wasted_sun.exceptions import ConfigurationError
@@ -56,7 +57,6 @@ def test_cube_provider_daily_and_ytd(monkeypatch):
                 {D_DATE: "2024-06-15", D_PERIOD: 2, D_MWH: 2, D_PRICE_ESP: 50},
             ]
         },
-        {"data": [{D_DATE: "2024-01-01", D_MWH: 10, D_PRICE_ESP: 50}]},
     ]
     fake, calls = _fake_urlopen_factory(responses)
     tz = ZoneInfo("Europe/Madrid")
@@ -69,8 +69,10 @@ def test_cube_provider_daily_and_ytd(monkeypatch):
             redispatch_codes=("RD1",),
             restriction_type_codes=(),
             qh_slots=2,
+            skip_ytd=False,
         )
-        metrics = prov.get_daily_metrics(day)
+        with patch.object(prov, "_ytd_mwh_eur", return_value=(Decimal("10"), Decimal("500.00"))):
+            metrics = prov.get_daily_metrics(day)
 
     assert metrics.day_total_mwh == Decimal("3")
     assert metrics.day_total_eur == Decimal("150.00")
@@ -143,6 +145,27 @@ def test_cube_provider_empty_day():
         )
         with pytest.raises(DayNotFoundError):
             prov.get_daily_metrics(date(2024, 6, 15))
+
+
+def test_month_ranges_splits_year():
+    assert _month_ranges(date(2024, 1, 1), date(2024, 3, 15)) == [
+        (date(2024, 1, 1), date(2024, 1, 31)),
+        (date(2024, 2, 1), date(2024, 2, 29)),
+        (date(2024, 3, 1), date(2024, 3, 15)),
+    ]
+
+
+def test_cube_skip_ytd_by_default():
+    prov = CubeMetricsProvider(
+        api_url="https://cube.example",
+        api_token="secret",
+        timezone=ZoneInfo("Europe/Madrid"),
+        eur_per_mwh=None,
+        redispatch_codes=("RD1",),
+        restriction_type_codes=(),
+        skip_ytd=True,
+    )
+    assert prov._ytd_mwh_eur(date(2024, 6, 15)) == (Decimal("0"), Decimal("0"))
 
 
 def test_cube_provider_requires_scope_codes():

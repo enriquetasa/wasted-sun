@@ -28,6 +28,7 @@ class DailyMetrics:
     mean_hourly_eur: Decimal
     as_of: datetime
     earliest_available_date: date
+    latest_available_date: date
 
 
 def mean_hourly_from_totals(total_mwh: Decimal, total_eur: Decimal, n_hours: int) -> tuple[Decimal, Decimal]:

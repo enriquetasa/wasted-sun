@@ -73,8 +73,10 @@ bars using the same rules as Postgres qh columns.
 **EUR:** If `WASTED_SUN_EUR_PER_MWH` is set and &gt; 0, that flat rate is used (Postgres parity).
 Otherwise EUR comes from per-row `PriceEspEurMwh` in Cube.
 
-**YTD / bounds:** Row-level Cube loads (no measures): sum `EnergyMwh` (and EUR) for
-`DateDay` from 1 Jan through the selected day; `MIN`/`MAX` `DateDay` for coverage and `as_of`.
+**YTD / bounds:** By default **`WASTED_SUN_CUBE_SKIP_YTD=true`** so pages stay within HTTP
+timeouts (YTD needs a full-year row scan without Cube measures). Set to `false` to enable
+monthly parallel YTD loads with **`WASTED_SUN_CUBE_YTD_TIMEOUT_SEC`** (default 20). Bounds use
+fast `limit: 1` queries on `DateDay`; `/` and **Latest** use **max** `DateDay`.
 
 ## Mock mode
 

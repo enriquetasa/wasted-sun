@@ -118,4 +118,5 @@ class MockMetricsProvider:
             mean_hourly_eur=mean_eur,
             as_of=as_of,
             earliest_available_date=self._earliest,
+            latest_available_date=self.latest_available_date(),
         )
