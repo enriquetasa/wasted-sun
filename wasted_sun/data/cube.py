@@ -126,27 +126,63 @@ class CubeClient:
                 "Authorization": self._token,
             },
         )
+        dims = ",".join(query.get("dimensions") or [])
+        t0 = time.perf_counter()
         for attempt in range(max_continue_wait):
             try:
                 with urlopen(req, timeout=self._timeout) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
             except HTTPError as e:
                 detail = e.read().decode("utf-8", errors="replace")[:500]
+                logger.warning(
+                    "cube load HTTP %s dims=%s attempt=%d elapsed_ms=%d",
+                    e.code,
+                    dims,
+                    attempt + 1,
+                    int((time.perf_counter() - t0) * 1000),
+                )
                 raise RuntimeError(f"Cube API HTTP {e.code}: {detail}") from e
             except URLError as e:
+                logger.warning(
+                    "cube load unreachable dims=%s attempt=%d elapsed_ms=%d err=%s",
+                    dims,
+                    attempt + 1,
+                    int((time.perf_counter() - t0) * 1000),
+                    e,
+                )
                 raise RuntimeError(f"Cube API unreachable: {e}") from e
 
             err = payload.get("error")
             if err == "Continue wait":
+                logger.info(
+                    "cube load continue-wait dims=%s attempt=%d/%d elapsed_ms=%d",
+                    dims,
+                    attempt + 1,
+                    max_continue_wait,
+                    int((time.perf_counter() - t0) * 1000),
+                )
                 if attempt + 1 >= max_continue_wait:
                     raise RuntimeError("Cube API still processing after continue-wait retries")
                 time.sleep(_CONTINUE_WAIT_SLEEP_SEC)
                 continue
             if err:
+                logger.warning(
+                    "cube load error dims=%s err=%s elapsed_ms=%d",
+                    dims,
+                    err,
+                    int((time.perf_counter() - t0) * 1000),
+                )
                 raise RuntimeError(f"Cube API error: {err}")
             data = payload.get("data")
             if not isinstance(data, list):
                 raise RuntimeError("Cube API response missing data array")
+            logger.info(
+                "cube load ok dims=%s rows=%d attempts=%d elapsed_ms=%d",
+                dims,
+                len(data),
+                attempt + 1,
+                int((time.perf_counter() - t0) * 1000),
+            )
             return data
         raise RuntimeError("Cube API continue-wait loop exhausted")
 
@@ -352,12 +388,20 @@ class CubeMetricsProvider:
         return datetime.combine(d, dt_time(23, 59, 59), tzinfo=self._tz)
 
     def get_daily_metrics(self, day: date) -> DailyMetrics:
+        t0 = time.perf_counter()
         earliest = self._ensure_earliest()
         latest = self._ensure_latest()
         if day < earliest or day > latest:
             raise DayNotFoundError(day)
 
         rows = self._load_day_rows(day)
+        logger.info(
+            "cube get_daily_metrics bounds day=%s skip_ytd=%s day_rows=%d bounds_ms=%d",
+            day,
+            self._skip_ytd,
+            len(rows),
+            int((time.perf_counter() - t0) * 1000),
+        )
         if not rows:
             raise DayNotFoundError(day)
 
@@ -380,6 +424,12 @@ class CubeMetricsProvider:
 
         n = len(hourly)
         mean_mwh, mean_eur = mean_hourly_from_totals(day_mwh, day_eur, n)
+
+        logger.info(
+            "cube get_daily_metrics done day=%s total_ms=%d",
+            day,
+            int((time.perf_counter() - t0) * 1000),
+        )
 
         return DailyMetrics(
             day=day,

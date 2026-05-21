@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from urllib.parse import quote, urlencode, urlparse
@@ -31,7 +32,14 @@ def _latest_data_day() -> date:
 
 def _provider():
     if "_metrics_provider" not in current_app.extensions:
-        current_app.extensions["_metrics_provider"] = get_provider(current_app)
+        t0 = time.perf_counter()
+        prov = get_provider(current_app)
+        current_app.extensions["_metrics_provider"] = prov
+        current_app.logger.info(
+            "metrics provider initialized: %s (%dms)",
+            prov.__class__.__name__,
+            int((time.perf_counter() - t0) * 1000),
+        )
     return current_app.extensions["_metrics_provider"]
 
 
@@ -89,6 +97,7 @@ def health() -> Response:
 
 @bp.route("/")
 def index():
+    t0 = time.perf_counter()
     try:
         latest = _latest_data_day()
     except ConfigurationError:
@@ -99,8 +108,17 @@ def index():
     except RuntimeError:
         return render_template("error.html", message=_("No energy data loaded yet.")), 503
     except Exception:
-        current_app.logger.exception("Failed to resolve latest data date")
+        current_app.logger.exception(
+            "index failed to resolve latest data date after %dms",
+            int((time.perf_counter() - t0) * 1000),
+        )
         return render_template("error.html", message=_("Database temporarily unavailable.")), 503
+    current_app.logger.info(
+        "index redirect to latest day=%s provider=%s (%dms)",
+        latest.isoformat(),
+        _provider().__class__.__name__,
+        int((time.perf_counter() - t0) * 1000),
+    )
     return redirect(url_for("main.day_view", day_str=latest.isoformat()), code=302)
 
 
@@ -119,6 +137,7 @@ def day_view(day_str: str):
             message=_("Invalid database configuration. Check environment variables."),
         ), 503
 
+    t0 = time.perf_counter()
     try:
         metrics = prov.get_daily_metrics(day)
     except DayNotFoundError:
@@ -132,8 +151,21 @@ def day_view(day_str: str):
     except RuntimeError:
         return render_template("error.html", message=_("No energy data loaded yet.")), 503
     except Exception:
-        current_app.logger.exception("Failed to load metrics for %s", day)
+        current_app.logger.exception(
+            "day_view failed day=%s provider=%s after %dms",
+            day,
+            prov.__class__.__name__,
+            int((time.perf_counter() - t0) * 1000),
+        )
         return render_template("error.html", message=_("Database temporarily unavailable.")), 503
+
+    current_app.logger.info(
+        "day_view ok day=%s provider=%s skip_ytd=%s (%dms)",
+        day,
+        prov.__class__.__name__,
+        not _show_ytd(),
+        int((time.perf_counter() - t0) * 1000),
+    )
 
     earliest = metrics.earliest_available_date
     latest_day = metrics.latest_available_date

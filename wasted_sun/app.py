@@ -1,4 +1,6 @@
+import logging
 import os
+import sys
 from decimal import Decimal
 
 from dotenv import load_dotenv
@@ -11,6 +13,20 @@ from wasted_sun.sql_guard import validate_plausible_domain, validate_plausible_s
 from wasted_sun.views import bp as main_bp
 
 
+def _configure_logging(app: Flask) -> None:
+    """Emit INFO+ logs to stdout for container/App Platform log drains."""
+    level = logging.DEBUG if app.debug else logging.INFO
+    root = logging.getLogger()
+    if not root.handlers:
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+            stream=sys.stdout,
+        )
+    root.setLevel(level)
+    app.logger.setLevel(level)
+
+
 def create_app() -> Flask:
     load_dotenv()
     app = Flask(
@@ -20,6 +36,7 @@ def create_app() -> Flask:
     )
     cfg = get_config()
     app.config.from_object(cfg)
+    _configure_logging(app)
 
     _root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = os.path.join(_root, "translations")
@@ -67,4 +84,13 @@ def create_app() -> Flask:
     app.jinja_env.globals["get_locale"] = babel_get_locale
 
     app.register_blueprint(main_bp)
+    app.logger.info(
+        "wasted_sun startup mock=%s postgres=%s cube_url_set=%s "
+        "data_source=%r cube_skip_ytd=%s",
+        bool(app.config.get("USE_MOCK_DATA")),
+        bool(app.config.get("DATABASE_URL")),
+        bool((app.config.get("CUBE_API_URL") or "").strip()),
+        app.config.get("DATA_SOURCE") or "",
+        app.config.get("CUBE_SKIP_YTD"),
+    )
     return app
