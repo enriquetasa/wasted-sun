@@ -10,6 +10,7 @@ from datetime import date, datetime, time as dt_time, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -127,8 +128,17 @@ class CubeClient:
             },
         )
         dims = ",".join(query.get("dimensions") or [])
+        host = urlparse(self._load_url).netloc
         t0 = time.perf_counter()
         for attempt in range(max_continue_wait):
+            logger.info(
+                "cube load start host=%s dims=%s attempt=%d/%d timeout_sec=%d",
+                host,
+                dims,
+                attempt + 1,
+                max_continue_wait,
+                self._timeout,
+            )
             try:
                 with urlopen(req, timeout=self._timeout) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
@@ -266,6 +276,7 @@ class CubeMetricsProvider:
         return [{"or": clauses}]
 
     def _load_day_rows(self, day: date) -> list[dict]:
+        logger.info("cube load_day_rows start day=%s", day)
         return self._client.load(
             {
                 "dimensions": [D_DATE, D_PERIOD, D_MWH, D_PRICE_ESP],
@@ -300,6 +311,7 @@ class CubeMetricsProvider:
 
     def _boundary_date(self, *, ascending: bool) -> date | None:
         order = "asc" if ascending else "desc"
+        logger.info("cube boundary_date start ascending=%s", ascending)
         rows = self._client.load(
             {
                 "dimensions": [D_DATE],

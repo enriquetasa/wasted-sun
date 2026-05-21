@@ -27,6 +27,7 @@ bp = Blueprint("main", __name__)
 
 
 def _latest_data_day() -> date:
+    current_app.logger.info("fetching latest_available_date from provider")
     return _provider().latest_available_date()
 
 
@@ -75,7 +76,13 @@ def _show_eur(metrics=None) -> bool:
 
 
 @bp.before_app_request
-def _locale_from_query() -> None:
+def _before_request() -> None:
+    current_app.logger.info(
+        "request start %s %s endpoint=%s",
+        request.method,
+        request.path,
+        request.endpoint,
+    )
     lang = request.args.get("lang")
     if lang in ("es", "en"):
         session["locale"] = lang
@@ -97,6 +104,7 @@ def health() -> Response:
 
 @bp.route("/")
 def index():
+    current_app.logger.info("index handler start")
     t0 = time.perf_counter()
     try:
         latest = _latest_data_day()
@@ -124,6 +132,7 @@ def index():
 
 @bp.route("/<day_str>/")
 def day_view(day_str: str):
+    current_app.logger.info("day_view handler start day_str=%s", day_str)
     try:
         day = date.fromisoformat(day_str)
     except ValueError:
@@ -137,6 +146,7 @@ def day_view(day_str: str):
             message=_("Invalid database configuration. Check environment variables."),
         ), 503
 
+    current_app.logger.info("day_view loading metrics for %s", day)
     t0 = time.perf_counter()
     try:
         metrics = prov.get_daily_metrics(day)
