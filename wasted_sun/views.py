@@ -108,7 +108,12 @@ def index():
     t0 = time.perf_counter()
     try:
         latest = _latest_data_day()
-    except ConfigurationError:
+    except ConfigurationError as e:
+        current_app.logger.error(
+            "index configuration error after %dms: %s",
+            int((time.perf_counter() - t0) * 1000),
+            e,
+        )
         return render_template(
             "error.html",
             message=_("Invalid database configuration. Check environment variables."),
@@ -140,7 +145,8 @@ def day_view(day_str: str):
 
     try:
         prov = _provider()
-    except ConfigurationError:
+    except ConfigurationError as e:
+        current_app.logger.error("day_view configuration error: %s", e)
         return render_template(
             "error.html",
             message=_("Invalid database configuration. Check environment variables."),

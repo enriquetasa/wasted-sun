@@ -84,13 +84,37 @@ def create_app() -> Flask:
     app.jinja_env.globals["get_locale"] = babel_get_locale
 
     app.register_blueprint(main_bp)
+    cube_url_set = bool((app.config.get("CUBE_API_URL") or "").strip())
+    cube_token_set = bool((app.config.get("CUBE_API_TOKEN") or "").strip())
+    cube_redispatch_set = bool((app.config.get("CUBE_REDISPATCH_CODES") or "").strip())
+    cube_restriction_set = bool(
+        (app.config.get("CUBE_RESTRICTION_TYPE_CODES") or "").strip()
+    )
     app.logger.info(
-        "wasted_sun startup mock=%s postgres=%s cube_url_set=%s "
-        "data_source=%r cube_skip_ytd=%s",
+        "wasted_sun startup mock=%s postgres=%s cube_url_set=%s cube_token_set=%s "
+        "cube_redispatch_set=%s cube_restriction_set=%s data_source=%r cube_skip_ytd=%s",
         bool(app.config.get("USE_MOCK_DATA")),
         bool(app.config.get("DATABASE_URL")),
-        bool((app.config.get("CUBE_API_URL") or "").strip()),
+        cube_url_set,
+        cube_token_set,
+        cube_redispatch_set,
+        cube_restriction_set,
         app.config.get("DATA_SOURCE") or "",
         app.config.get("CUBE_SKIP_YTD"),
     )
+    using_cube = (
+        not app.config.get("USE_MOCK_DATA")
+        and (
+            (app.config.get("DATA_SOURCE") or "").strip().lower() == "cube"
+            or (cube_url_set and not app.config.get("DATABASE_URL"))
+        )
+    )
+    if using_cube:
+        if not cube_token_set:
+            app.logger.error("cube config incomplete: CUBE_API_TOKEN is missing or empty")
+        if not cube_redispatch_set and not cube_restriction_set:
+            app.logger.error(
+                "cube config incomplete: set WASTED_SUN_CUBE_REDISPATCH_CODES "
+                "and/or WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES"
+            )
     return app
