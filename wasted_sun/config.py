@@ -27,6 +27,7 @@ class Config:
     CUBE_RESTRICTION_TYPE_CODES = os.environ.get(
         "WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES", ""
     ).strip()
+    CUBE_HTTP_TIMEOUT_SEC = int(os.environ.get("WASTED_SUN_CUBE_HTTP_TIMEOUT_SEC", "90"))
 
     # Plausible (optional)
     PLAUSIBLE_DOMAIN = os.environ.get("PLAUSIBLE_DOMAIN", "").strip()

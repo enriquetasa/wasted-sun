@@ -34,6 +34,7 @@ def _cube_provider(cfg, *, api_url: str, token: str, eur, qh_slots: int):
     except ValueError as e:
         raise ConfigurationError(str(e)) from e
     try:
+        timeout = int(cfg.get("CUBE_HTTP_TIMEOUT_SEC", 90))
         return CubeMetricsProvider(
             api_url=api_url,
             api_token=token,
@@ -42,6 +43,7 @@ def _cube_provider(cfg, *, api_url: str, token: str, eur, qh_slots: int):
             redispatch_codes=redispatch,
             restriction_type_codes=restriction,
             qh_slots=qh_slots,
+            http_timeout_sec=timeout,
         )
     except ValueError as e:
         raise ConfigurationError(str(e)) from e

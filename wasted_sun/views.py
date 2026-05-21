@@ -101,22 +101,22 @@ def day_view(day_str: str):
         ), 503
 
     try:
-        earliest = prov.earliest_date()
+        metrics = prov.get_daily_metrics(day)
+    except DayNotFoundError:
+        try:
+            earliest = prov.earliest_date()
+        except (RuntimeError, Exception):
+            return render_template("error.html", message=_("No data for this date.")), 404
+        if day < earliest:
+            return render_template("error.html", message=_("No data before coverage starts.")), 404
+        return render_template("error.html", message=_("No data for this date.")), 404
     except RuntimeError:
         return render_template("error.html", message=_("No energy data loaded yet.")), 503
     except Exception:
-        current_app.logger.exception("Failed to query earliest date")
-        return render_template("error.html", message=_("Database temporarily unavailable.")), 503
-    if day < earliest:
-        return render_template("error.html", message=_("No data before coverage starts.")), 404
-
-    try:
-        metrics = prov.get_daily_metrics(day)
-    except DayNotFoundError:
-        return render_template("error.html", message=_("No data for this date.")), 404
-    except Exception:
         current_app.logger.exception("Failed to load metrics for %s", day)
         return render_template("error.html", message=_("Database temporarily unavailable.")), 503
+
+    earliest = metrics.earliest_available_date
 
     prev_day = day - timedelta(days=1)
     next_day = day + timedelta(days=1)

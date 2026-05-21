@@ -48,13 +48,13 @@ def _fake_urlopen_factory(responses: list[dict]):
 def test_cube_provider_daily_and_ytd(monkeypatch):
     day = date(2024, 6, 15)
     responses = [
+        {"data": [{D_DATE: "2024-01-01"}]},
         {
             "data": [
                 {D_DATE: "2024-06-15", D_PERIOD: 1, D_MWH: 1, D_PRICE_ESP: 50},
                 {D_DATE: "2024-06-15", D_PERIOD: 2, D_MWH: 2, D_PRICE_ESP: 50},
             ]
         },
-        {"data": [{D_DATE: "2024-01-01"}]},
         {"data": [{D_DATE: "2024-01-01", D_MWH: 10, D_PRICE_ESP: 50}]},
         {"data": [{D_DATE: "2024-06-15"}]},
     ]
@@ -77,19 +77,22 @@ def test_cube_provider_daily_and_ytd(monkeypatch):
     assert metrics.ytd_mwh == Decimal("10")
     assert metrics.ytd_eur == Decimal("500.00")
     assert len(metrics.hourly) == 24
-    assert calls[0]["filters"][0]["values"] == ["2024-06-15"]
+    day_query = next(
+        c for c in calls if c["filters"][0]["member"] == D_DATE and c["filters"][0]["operator"] == "equals"
+    )
+    assert day_query["filters"][0]["values"] == ["2024-06-15"]
     assert {
         "member": "WastedEnergy.RedispatchCode",
         "operator": "equals",
         "values": ["RD1"],
-    } in calls[0]["filters"]
+    } in day_query["filters"]
 
 
 def test_cube_scope_or_when_both_lists():
     tz = ZoneInfo("Europe/Madrid")
     responses = [
-        {"data": [{D_DATE: "2024-06-15", D_PERIOD: 1, D_MWH: 1, D_PRICE_ESP: 1}]},
         {"data": [{D_DATE: "2024-01-01"}]},
+        {"data": [{D_DATE: "2024-06-15", D_PERIOD: 1, D_MWH: 1, D_PRICE_ESP: 1}]},
         {"data": []},
         {"data": [{D_DATE: "2024-06-15"}]},
     ]
@@ -105,7 +108,8 @@ def test_cube_scope_or_when_both_lists():
         )
         prov.get_daily_metrics(date(2024, 6, 15))
 
-    scope = [f for f in calls[0]["filters"] if "or" in f or f.get("member", "").startswith("WastedEnergy.R")]
+    day_query = next(c for c in calls if D_PERIOD in c.get("dimensions", []))
+    scope = [f for f in day_query["filters"] if "or" in f or f.get("member", "").startswith("WastedEnergy.R")]
     assert len(scope) == 1
     assert scope[0]["or"] == [
         {
@@ -122,7 +126,10 @@ def test_cube_scope_or_when_both_lists():
 
 
 def test_cube_provider_empty_day():
-    responses = [{"data": []}]
+    responses = [
+        {"data": [{D_DATE: "2024-01-01"}]},
+        {"data": []},
+    ]
     fake, _ = _fake_urlopen_factory(responses)
     with patch("wasted_sun.data.cube.urlopen", fake):
         prov = CubeMetricsProvider(
