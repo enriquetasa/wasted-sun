@@ -18,6 +18,16 @@ class Config:
     USE_MOCK_DATA = _bool("USE_MOCK_DATA", default=False)
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
+    # cube | postgres | mock (empty: cube if CUBE_API_URL set, else postgres/mock)
+    DATA_SOURCE = os.environ.get("WASTED_SUN_DATA_SOURCE", "").strip().lower()
+    CUBE_API_URL = os.environ.get("CUBE_API_URL", "").strip()
+    CUBE_API_TOKEN = os.environ.get("CUBE_API_TOKEN", "").strip()
+    # Comma-separated allowlists — only these rows count as wasted sun (required for Cube mode).
+    CUBE_REDISPATCH_CODES = os.environ.get("WASTED_SUN_CUBE_REDISPATCH_CODES", "").strip()
+    CUBE_RESTRICTION_TYPE_CODES = os.environ.get(
+        "WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES", ""
+    ).strip()
+
     # Plausible (optional)
     PLAUSIBLE_DOMAIN = os.environ.get("PLAUSIBLE_DOMAIN", "").strip()
     PLAUSIBLE_SCRIPT_URL = os.environ.get(

@@ -1,5 +1,9 @@
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from zoneinfo import ZoneInfo
+
+from wasted_sun.models import DailyMetrics
+from wasted_sun.views import _show_eur
 
 
 def test_index_redirects_to_today(client):
@@ -86,6 +90,24 @@ def test_lang_query_param_switches_locale(client):
     r = client.get(f"/{d.isoformat()}/?lang=es")
     assert r.status_code == 200
     assert b"sol desperdiciada" in r.data.lower()
+
+
+def test_show_eur_when_cube_prices_without_flat_rate(app):
+    app.config["EUR_PER_MWH"] = None
+    metrics = DailyMetrics(
+        day=date(2024, 6, 15),
+        hourly=(),
+        day_total_mwh=Decimal("1"),
+        day_total_eur=Decimal("50"),
+        ytd_mwh=Decimal("1"),
+        ytd_eur=Decimal("50"),
+        mean_hourly_mwh=Decimal("0"),
+        mean_hourly_eur=Decimal("0"),
+        as_of=datetime.now(ZoneInfo("Europe/Madrid")),
+        earliest_available_date=date(2024, 1, 1),
+    )
+    with app.app_context():
+        assert _show_eur(metrics) is True
 
 
 def test_set_locale_invalid_lang_redirects(client):

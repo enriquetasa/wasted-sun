@@ -46,9 +46,13 @@ def _city_analogy_households(day_mwh: Decimal) -> int:
     return int(equiv.to_integral_value())
 
 
-def _show_eur() -> bool:
+def _show_eur(metrics=None) -> bool:
     rate = current_app.config.get("EUR_PER_MWH")
-    return rate is not None and rate > 0
+    if rate is not None and rate > 0:
+        return True
+    if metrics is not None and metrics.day_total_eur > 0:
+        return True
+    return False
 
 
 @bp.before_app_request
@@ -122,7 +126,7 @@ def day_view(day_str: str):
     share_path = f"{day.isoformat()}/"
     share_url = f"{current_app.config['BASE_URL'].rstrip('/')}/{share_path}"
 
-    show_eur = _show_eur()
+    show_eur = _show_eur(metrics)
     if show_eur:
         share_text = _(
             "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); illustrative ~%(day_eur)s "

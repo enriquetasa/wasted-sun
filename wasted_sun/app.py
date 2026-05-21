@@ -24,7 +24,7 @@ def create_app() -> Flask:
     _root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = os.path.join(_root, "translations")
 
-    if not app.config.get("DATABASE_URL"):
+    if not app.config.get("DATABASE_URL") and not app.config.get("CUBE_API_URL"):
         app.config["USE_MOCK_DATA"] = True
 
     raw_eur = os.environ.get("WASTED_SUN_EUR_PER_MWH")
@@ -33,7 +33,10 @@ def create_app() -> Flask:
     else:
         app.config["EUR_PER_MWH"] = None
 
-    mockish = app.config.get("USE_MOCK_DATA") or not app.config.get("DATABASE_URL")
+    mockish = (
+        app.config.get("USE_MOCK_DATA")
+        or (not app.config.get("DATABASE_URL") and not app.config.get("CUBE_API_URL"))
+    )
     if mockish and app.config["EUR_PER_MWH"] is None:
         app.config["EUR_PER_MWH"] = Decimal("52")
 

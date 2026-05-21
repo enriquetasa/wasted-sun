@@ -1,6 +1,6 @@
 # Wasted Sun
 
-Flask dashboard for **peninsula** “unused solar” metrics: **quarter-hourly** `qh_*_mwh` columns per `date_day` in **PostgreSQL** (i3dia-style wide rows, or **mock** data locally), rolled up to **24 hourly** chart bars. **Spanish by default** with an **English** language toggle, aimed at **DigitalOcean App Platform**.
+Flask dashboard for **peninsula** “unused solar” metrics: **PostgreSQL** (i3dia-style wide `qh_*_mwh` rows), **Cube.js** (`WastedEnergy` long format), or **mock** data locally — all rolled up to **24 hourly** chart bars. **Spanish by default** with an **English** language toggle, aimed at **DigitalOcean App Platform**.
 
 ## Local development
 
@@ -57,7 +57,7 @@ docker run --rm -p 8080:8080 \
 
 Use **`SESSION_COOKIE_SECURE=false`** when testing over **plain HTTP** (e.g. local Docker); otherwise the **locale cookie** for EN/ES may not stick. Use the default **`true`** behind HTTPS in production.
 
-`docker run` without **`DATABASE_URL`** uses **mock data** (with a default illustrative €/MWh unless you set **`WASTED_SUN_EUR_PER_MWH=0`**).
+`docker run` without **`DATABASE_URL`** or **`CUBE_API_URL`** uses **mock data** (with a default illustrative €/MWh unless you set **`WASTED_SUN_EUR_PER_MWH=0`**).
 
 On [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform), connect the repo or container, set **HTTP port** `8080`, add a **`/health`** HTTP health check if the platform supports it, and configure environment variables (`SECRET_KEY`, `BASE_URL`, `DATABASE_URL`, etc.). Use a **trusted source** or **VPC** connection to Postgres when possible.
 

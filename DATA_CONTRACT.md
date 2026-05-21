@@ -43,6 +43,40 @@ Environment-driven SQL is limited to validated identifiers and, for `WASTED_SUN_
 
 Set `WASTED_SUN_PG_TABLE` to your table or **VIEW** name (default in config: `wasted_sun_qh_daily`).
 
+## Cube.js (`WastedEnergy` cube)
+
+When `CUBE_API_URL` and `CUBE_API_TOKEN` are set (or `WASTED_SUN_DATA_SOURCE=cube`), the app
+queries the **fixed** public `WastedEnergy` semantic model (dimensions only; schema does not
+change on the Cube side):
+
+| Member | Role |
+| ------ | ---- |
+| `WastedEnergy.DateDay` | Calendar day (`YYYY-MM-DD` string) |
+| `WastedEnergy.QuarterPeriod` | 1-based quarter-hour index (1 … `WASTED_SUN_PG_QH_SLOTS`) |
+| `WastedEnergy.EnergyMwh` | MWh for that period |
+| `WastedEnergy.PriceEspEurMwh` | Illustrative €/MWh for that row (peninsula) |
+
+**Wasted-sun scope:** Not every redispatch/restriction row is unused solar. Set at least one of:
+
+- `WASTED_SUN_CUBE_REDISPATCH_CODES` — comma-separated `RedispatchCode` allowlist
+- `WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES` — comma-separated `RestrictionTypeCode` allowlist
+
+When both are set, lists are combined with **OR** (row matches if its `RedispatchCode` is in the
+first list **or** its `RestrictionTypeCode` is in the second). Applied to
+day, YTD, earliest-date, and `as_of` queries. Other dimensions (`EnergyConcept`,
+`RedispatchDirection`, descriptions, `PricePtEurMwh`, …) are not used.
+
+**Day chart:** rows for one `DateDay` are pivoted by `QuarterPeriod` (summing `EnergyMwh` and
+`EnergyMwh × PriceEspEurMwh` when multiple rows share a period), then rolled into 24 hourly
+bars using the same rules as Postgres qh columns.
+
+**EUR:** If `WASTED_SUN_EUR_PER_MWH` is set and &gt; 0, that flat rate is used (Postgres parity).
+Otherwise EUR comes from per-row `PriceEspEurMwh` in Cube.
+
+**YTD / bounds:** Row-level Cube loads (no measures): sum `EnergyMwh` (and EUR) for
+`DateDay` from 1 Jan through the selected day; `MIN`/`MAX` `DateDay` for coverage and `as_of`.
+
 ## Mock mode
 
-Without `DATABASE_URL`, or with `USE_MOCK_DATA=true`, the app uses fixtures and ignores this schema.
+Without `DATABASE_URL` or `CUBE_API_URL`, or with `USE_MOCK_DATA=true`, the app uses fixtures
+and ignores the Postgres schema.

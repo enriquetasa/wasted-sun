@@ -1,6 +1,7 @@
 import pytest
 
 from wasted_sun.sql_guard import (
+    parse_cube_code_list,
     validate_as_of_select,
     validate_pg_identifier,
     validate_pg_qualified_table,
@@ -8,6 +9,13 @@ from wasted_sun.sql_guard import (
     validate_plausible_script_url,
     validate_qh_slots,
 )
+
+
+def test_parse_cube_code_list():
+    assert parse_cube_code_list("a, b ,c", label="test") == ("a", "b", "c")
+    assert parse_cube_code_list("", label="test") == ()
+    with pytest.raises(ValueError):
+        parse_cube_code_list("bad code", label="test")
 
 
 def test_rejects_bad_identifiers():

@@ -66,6 +66,32 @@ def validate_as_of_select(query: str) -> str:
     return s
 
 
+_CUBE_CODE = re.compile(r"^[A-Za-z0-9_.\-]+$")
+_MAX_CUBE_CODE_LEN = 64
+
+
+def parse_cube_code_list(raw: str, *, label: str) -> tuple[str, ...]:
+    """
+    Comma-separated allowlist for Cube dimension filters (redispatch / restriction codes).
+    """
+    s = raw.strip()
+    if not s:
+        return ()
+    out: list[str] = []
+    for part in s.split(","):
+        code = part.strip()
+        if not code:
+            continue
+        if len(code) > _MAX_CUBE_CODE_LEN or not _CUBE_CODE.match(code):
+            raise ValueError(
+                f"invalid {label}: codes must be alphanumeric (plus _ . -), max {_MAX_CUBE_CODE_LEN} chars"
+            )
+        out.append(code)
+    if not out:
+        return ()
+    return tuple(out)
+
+
 def validate_qh_slots(n: int) -> int:
     if n < 1 or n > 200:
         raise ValueError("WASTED_SUN_PG_QH_SLOTS must be between 1 and 200")

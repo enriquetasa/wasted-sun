@@ -1,0 +1,322 @@
+"""Cube.js WastedEnergy cube (fixed schema: dimensions only, no measures)."""
+
+from __future__ import annotations
+
+import json
+import logging
+from datetime import date, datetime, time, timedelta
+from decimal import Decimal, InvalidOperation
+from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
+
+from wasted_sun.models import DailyMetrics, DayNotFoundError, HourlyPoint, mean_hourly_from_totals
+from wasted_sun.timeseries import hourly_mwh_from_qh, qh_series_to_hourly_points
+
+logger = logging.getLogger(__name__)
+
+# Fixed public WastedEnergy semantic layer (schema does not change).
+CUBE = "WastedEnergy"
+D_DATE = f"{CUBE}.DateDay"
+D_PERIOD = f"{CUBE}.QuarterPeriod"
+D_MWH = f"{CUBE}.EnergyMwh"
+D_PRICE_ESP = f"{CUBE}.PriceEspEurMwh"
+D_REDISPATCH = f"{CUBE}.RedispatchCode"
+D_RESTRICTION = f"{CUBE}.RestrictionTypeCode"
+
+_DEFAULT_QH_SLOTS = 100
+_LOAD_PATH = "/cubejs-api/v1/load"
+_TIMEOUT_SEC = 60
+_CONTINUE_WAIT_MAX = 120
+
+
+def _decimal(value: Any) -> Decimal:
+    if value is None:
+        return Decimal("0")
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return Decimal("0")
+
+
+def _period_index(row: dict, n_slots: int) -> int | None:
+    raw = row.get(D_PERIOD)
+    if raw is None:
+        return None
+    try:
+        period = int(raw)
+    except (TypeError, ValueError):
+        return None
+    if period < 1 or period > n_slots:
+        return None
+    return period - 1
+
+
+def merge_cube_rows(
+    rows: list[dict],
+    n_slots: int,
+) -> tuple[list[Decimal], list[Decimal]]:
+    """
+    Pivot long Cube rows into per-slot MWh and EUR (EUR = sum of mwh * PriceEspEurMwh).
+    Multiple rows per QuarterPeriod are summed (same as Postgres qh merge).
+    """
+    qh_mwh = [Decimal("0")] * n_slots
+    qh_eur = [Decimal("0")] * n_slots
+    for row in rows:
+        i = _period_index(row, n_slots)
+        if i is None:
+            continue
+        mwh = _decimal(row.get(D_MWH))
+        price = _decimal(row.get(D_PRICE_ESP))
+        qh_mwh[i] += mwh
+        if mwh and price:
+            qh_eur[i] += (mwh * price).quantize(Decimal("0.00001"))
+    return qh_mwh, qh_eur
+
+
+def _hourly_points_from_slots(
+    day: date,
+    qh_mwh: list[Decimal],
+    qh_eur: list[Decimal],
+    tz: ZoneInfo,
+    n_slots: int,
+) -> tuple[tuple[HourlyPoint, ...], Decimal, Decimal]:
+    hourly_mwh = hourly_mwh_from_qh(qh_mwh, n_slots=n_slots)
+    hourly_eur_vals = hourly_mwh_from_qh(qh_eur, n_slots=n_slots)
+    day_start = datetime(day.year, day.month, day.day, 0, 0, tzinfo=tz)
+    points: list[HourlyPoint] = []
+    for h, mwh in enumerate(hourly_mwh):
+        ts = day_start + timedelta(hours=h)
+        eur = hourly_eur_vals[h].quantize(Decimal("0.01"))
+        points.append(HourlyPoint(bucket_start=ts, mwh_unused=mwh, eur_waste=eur))
+    day_mwh = sum(qh_mwh[:n_slots], start=Decimal("0"))
+    day_eur = sum(qh_eur[:n_slots], start=Decimal("0")).quantize(Decimal("0.01"))
+    return tuple(points), day_mwh, day_eur
+
+
+class CubeClient:
+    def __init__(self, api_url: str, api_token: str, *, timeout_sec: int = _TIMEOUT_SEC) -> None:
+        base = api_url.rstrip("/")
+        self._load_url = f"{base}{_LOAD_PATH}"
+        self._token = api_token.strip()
+        self._timeout = timeout_sec
+
+    def load(self, query: dict[str, Any]) -> list[dict]:
+        body = json.dumps({"query": query}).encode("utf-8")
+        # Cube REST docs use Authorization: TOKEN (raw secret). Prefix "Bearer " in
+        # CUBE_API_TOKEN yourself only if your deployment requires it.
+        req = Request(
+            self._load_url,
+            data=body,
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": self._token,
+            },
+        )
+        for attempt in range(_CONTINUE_WAIT_MAX):
+            try:
+                with urlopen(req, timeout=self._timeout) as resp:
+                    payload = json.loads(resp.read().decode("utf-8"))
+            except HTTPError as e:
+                detail = e.read().decode("utf-8", errors="replace")[:500]
+                raise RuntimeError(f"Cube API HTTP {e.code}: {detail}") from e
+            except URLError as e:
+                raise RuntimeError(f"Cube API unreachable: {e}") from e
+
+            err = payload.get("error")
+            if err == "Continue wait":
+                if attempt + 1 >= _CONTINUE_WAIT_MAX:
+                    raise RuntimeError("Cube API still processing after continue-wait retries")
+                continue
+            if err:
+                raise RuntimeError(f"Cube API error: {err}")
+            data = payload.get("data")
+            if not isinstance(data, list):
+                raise RuntimeError("Cube API response missing data array")
+            return data
+        raise RuntimeError("Cube API continue-wait loop exhausted")
+
+
+class CubeMetricsProvider:
+    """Read-only metrics from the fixed WastedEnergy Cube.js model."""
+
+    def __init__(
+        self,
+        api_url: str,
+        api_token: str,
+        timezone: ZoneInfo,
+        eur_per_mwh: Decimal | None,
+        redispatch_codes: tuple[str, ...],
+        restriction_type_codes: tuple[str, ...],
+        qh_slots: int = _DEFAULT_QH_SLOTS,
+    ) -> None:
+        if qh_slots < 1 or qh_slots > 200:
+            raise ValueError("qh_slots must be between 1 and 200")
+        if not redispatch_codes and not restriction_type_codes:
+            raise ValueError(
+                "Set WASTED_SUN_CUBE_REDISPATCH_CODES and/or "
+                "WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES to the codes that mean wasted sun"
+            )
+        self._client = CubeClient(api_url, api_token)
+        self._tz = timezone
+        self._eur_per_mwh = eur_per_mwh
+        self._qh_slots = qh_slots
+        self._redispatch_codes = redispatch_codes
+        self._restriction_type_codes = restriction_type_codes
+
+    def _wasted_sun_filters(self) -> list[dict[str, Any]]:
+        """Row matches if RedispatchCode OR RestrictionTypeCode is in the allowlists."""
+        clauses: list[dict[str, Any]] = []
+        if self._redispatch_codes:
+            clauses.append(
+                {
+                    "member": D_REDISPATCH,
+                    "operator": "equals",
+                    "values": list(self._redispatch_codes),
+                }
+            )
+        if self._restriction_type_codes:
+            clauses.append(
+                {
+                    "member": D_RESTRICTION,
+                    "operator": "equals",
+                    "values": list(self._restriction_type_codes),
+                }
+            )
+        if len(clauses) == 1:
+            return clauses
+        return [{"or": clauses}]
+
+    def _load_day_rows(self, day: date) -> list[dict]:
+        return self._client.load(
+            {
+                "dimensions": [D_DATE, D_PERIOD, D_MWH, D_PRICE_ESP],
+                "filters": [
+                    {
+                        "member": D_DATE,
+                        "operator": "equals",
+                        "values": [day.isoformat()],
+                    },
+                    *self._wasted_sun_filters(),
+                ],
+                "order": {D_PERIOD: "asc"},
+                "limit": 50_000,
+            }
+        )
+
+    def _load_ytd_rows(self, through: date) -> list[dict]:
+        y0 = date(through.year, 1, 1)
+        limit = 500_000
+        rows = self._client.load(
+            {
+                "dimensions": [D_DATE, D_MWH, D_PRICE_ESP],
+                "filters": [
+                    {"member": D_DATE, "operator": "gte", "values": [y0.isoformat()]},
+                    {"member": D_DATE, "operator": "lte", "values": [through.isoformat()]},
+                    *self._wasted_sun_filters(),
+                ],
+                "limit": limit,
+            }
+        )
+        if len(rows) >= limit:
+            logger.warning(
+                "Cube YTD query returned %s rows (limit %s); totals may be truncated",
+                len(rows),
+                limit,
+            )
+        return rows
+
+    def _boundary_date(self, *, ascending: bool) -> date | None:
+        order = "asc" if ascending else "desc"
+        rows = self._client.load(
+            {
+                "dimensions": [D_DATE],
+                "filters": self._wasted_sun_filters(),
+                "order": {D_DATE: order},
+                "limit": 1,
+            }
+        )
+        if not rows:
+            return None
+        raw = rows[0].get(D_DATE)
+        if raw is None:
+            return None
+        if isinstance(raw, date):
+            return raw
+        return date.fromisoformat(str(raw)[:10])
+
+    def earliest_date(self) -> date:
+        d = self._boundary_date(ascending=True)
+        if d is None:
+            raise RuntimeError("wasted_sun: Cube WastedEnergy has no DateDay values")
+        return d
+
+    def _ytd_mwh_eur(self, through: date) -> tuple[Decimal, Decimal]:
+        rows = self._load_ytd_rows(through)
+        total_mwh = Decimal("0")
+        total_eur = Decimal("0")
+        use_flat = self._eur_per_mwh is not None and self._eur_per_mwh > 0
+        for row in rows:
+            mwh = _decimal(row.get(D_MWH))
+            total_mwh += mwh
+            if use_flat:
+                total_eur += mwh * self._eur_per_mwh  # type: ignore[operator]
+            else:
+                price = _decimal(row.get(D_PRICE_ESP))
+                if mwh and price:
+                    total_eur += mwh * price
+        return total_mwh, total_eur.quantize(Decimal("0.01"))
+
+    def _as_of(self) -> datetime:
+        d = self._boundary_date(ascending=False)
+        if d is None:
+            return datetime.now(self._tz)
+        return datetime.combine(d, time(23, 59, 59), tzinfo=self._tz)
+
+    def get_daily_metrics(self, day: date) -> DailyMetrics:
+        today = datetime.now(self._tz).date()
+        if day > today:
+            raise DayNotFoundError(day)
+
+        rows = self._load_day_rows(day)
+        if not rows:
+            raise DayNotFoundError(day)
+
+        earliest = self.earliest_date()
+        if day < earliest:
+            raise DayNotFoundError(day)
+
+        ytd_mwh, ytd_eur = self._ytd_mwh_eur(day)
+        as_of = self._as_of()
+
+        qh_mwh, qh_eur_slots = merge_cube_rows(rows, self._qh_slots)
+        use_flat = self._eur_per_mwh is not None and self._eur_per_mwh > 0
+
+        if use_flat:
+            hourly, day_mwh, day_eur = qh_series_to_hourly_points(
+                day, qh_mwh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
+            )
+            if self._eur_per_mwh and self._eur_per_mwh > 0:
+                ytd_eur = (ytd_mwh * self._eur_per_mwh).quantize(Decimal("0.01"))
+        else:
+            hourly, day_mwh, day_eur = _hourly_points_from_slots(
+                day, qh_mwh, qh_eur_slots, self._tz, self._qh_slots
+            )
+
+        n = len(hourly)
+        mean_mwh, mean_eur = mean_hourly_from_totals(day_mwh, day_eur, n)
+
+        return DailyMetrics(
+            day=day,
+            hourly=hourly,
+            day_total_mwh=day_mwh,
+            day_total_eur=day_eur,
+            ytd_mwh=ytd_mwh,
+            ytd_eur=ytd_eur,
+            mean_hourly_mwh=mean_mwh,
+            mean_hourly_eur=mean_eur,
+            as_of=as_of,
+            earliest_available_date=earliest,
+        )
