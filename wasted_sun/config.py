@@ -42,6 +42,7 @@ class Config:
     PG_TABLE = os.environ.get("WASTED_SUN_PG_TABLE", "wasted_sun_qh_daily")
     PG_COL_DATE_DAY = os.environ.get("WASTED_SUN_PG_COL_DATE_DAY", "date_day")
     PG_COL_TOTAL_MWH = os.environ.get("WASTED_SUN_PG_COL_TOTAL_MWH", "total_mwh")
+    PG_COL_TOTAL_EUR = os.environ.get("WASTED_SUN_PG_COL_TOTAL_EUR", "total_eur")
     PG_QH_SLOTS = int(os.environ.get("WASTED_SUN_PG_QH_SLOTS", "100"))
     PG_AS_OF_QUERY = os.environ.get(
         "WASTED_SUN_PG_AS_OF_QUERY",

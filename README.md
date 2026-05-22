@@ -67,7 +67,7 @@ See [DATA_CONTRACT.md](DATA_CONTRACT.md) for the expected SQL schema and [`.env.
 
 The site serves pages from **Postgres** only. A daily **Job** pulls from Cube and upserts the wide mart.
 
-1. Apply [`migrations/001_wasted_sun_qh_daily.sql`](migrations/001_wasted_sun_qh_daily.sql) on your database.
+1. Apply [`migrations/001_wasted_sun_qh_daily.sql`](migrations/001_wasted_sun_qh_daily.sql) and [`migrations/002_wasted_sun_qh_eur.sql`](migrations/002_wasted_sun_qh_eur.sql) on your database.
 2. Deploy the **Job** component (see [`.do/app.yaml`](.do/app.yaml)): run `wasted-sun-sync --full` once for backfill, then schedule `wasted-sun-sync --days 7` daily.
 3. Point the **web** service at Postgres (`WASTED_SUN_DATA_SOURCE=postgres`); omit `CUBE_API_*` from web env.
 

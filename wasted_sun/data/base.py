@@ -108,6 +108,7 @@ def get_provider(app: Flask):
             table=cfg["PG_TABLE"],
             date_col=cfg["PG_COL_DATE_DAY"],
             total_mwh_col=cfg["PG_COL_TOTAL_MWH"],
+            total_eur_col=cfg["PG_COL_TOTAL_EUR"],
             as_of_query=cfg.get("PG_AS_OF_QUERY") or None,
             as_of_meta_table=cfg.get("PG_AS_OF_META_TABLE") or None,
             as_of_meta_column=cfg.get("PG_AS_OF_META_COLUMN") or None,

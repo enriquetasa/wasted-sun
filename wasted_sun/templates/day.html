@@ -153,7 +153,7 @@
   </p>
   <p>
     {% trans %}
-    Euro amounts appear as a simple illustrative rate for energy, not a market settlement: but they make clear that unused MWh are not economically neutral.
+    Euro amounts use peninsula prices from the data pipeline (Cube <code>PriceEspEurMwh</code> at sync time) unless the site operator sets a flat illustrative €/MWh override. They are not a market settlement, but they show that unused MWh are not economically neutral.
     {% endtrans %}
   </p>
   <h3>{% trans %}Household analogy{% endtrans %}</h3>

@@ -16,7 +16,12 @@ from wasted_sun.sql_guard import (
     validate_pg_qualified_table,
     validate_qh_slots,
 )
-from wasted_sun.timeseries import merge_qh_across_rows, qh_series_to_hourly_points
+from wasted_sun.timeseries import (
+    merge_qh_across_rows,
+    merge_qh_eur_across_rows,
+    qh_mwh_eur_to_hourly_points,
+    qh_series_to_hourly_points,
+)
 
 
 def _qualified_sql_identifier(qualified_name: str) -> sql.Identifier:
@@ -37,6 +42,7 @@ class PostgresMetricsProvider:
         table: str,
         date_col: str,
         total_mwh_col: str,
+        total_eur_col: str,
         as_of_query: str | None,
         as_of_meta_table: str | None,
         as_of_meta_column: str | None,
@@ -49,6 +55,9 @@ class PostgresMetricsProvider:
         self._date_col = validate_pg_identifier(date_col, label="WASTED_SUN_PG_COL_DATE_DAY")
         self._total_mwh_col = validate_pg_identifier(
             total_mwh_col, label="WASTED_SUN_PG_COL_TOTAL_MWH"
+        )
+        self._total_eur_col = validate_pg_identifier(
+            total_eur_col, label="WASTED_SUN_PG_COL_TOTAL_EUR"
         )
         self._qh_slots = validate_qh_slots(qh_slots)
         self._eur_per_mwh = eur_per_mwh
@@ -136,6 +145,22 @@ class PostgresMetricsProvider:
         assert row is not None
         return Decimal(str(row["s"]))
 
+    def _fetch_ytd_eur(self, conn: psycopg.Connection, through: date) -> Decimal:
+        y0 = date(through.year, 1, 1)
+        te = sql.Identifier(self._total_eur_col)
+        q = sql.SQL(
+            "SELECT COALESCE(SUM(ABS({te})), 0) AS s FROM {tbl} "
+            "WHERE {dc} >= %s AND {dc} <= %s"
+        ).format(te=te, tbl=self._tbl(), dc=self._dc())
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(q, (y0, through))
+            row = cur.fetchone()
+        assert row is not None
+        return Decimal(str(row["s"])).quantize(Decimal("0.01"))
+
+    def _uses_flat_eur_rate(self) -> bool:
+        return self._eur_per_mwh is not None and self._eur_per_mwh > 0
+
     def _fetch_as_of(self, conn: psycopg.Connection) -> datetime:
         if self._as_of_meta_table and self._as_of_meta_column:
             t = _qualified_sql_identifier(self._as_of_meta_table)
@@ -188,20 +213,25 @@ class PostgresMetricsProvider:
                 raise DayNotFoundError(day)
             ytd_mwh = self._fetch_ytd_mwh(conn, day)
             as_of = self._fetch_as_of(conn)
+            if self._uses_flat_eur_rate():
+                ytd_eur = (ytd_mwh * self._eur_per_mwh).quantize(Decimal("0.01"))  # type: ignore[operator]
+            else:
+                ytd_eur = self._fetch_ytd_eur(conn, day)
 
-        qh = merge_qh_across_rows(rows, self._qh_slots)
-        hourly, day_mwh_from_qh, day_eur_from_qh = qh_series_to_hourly_points(
-            day, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
-        )
-
-        day_mwh = day_mwh_from_qh
-        ytd_eur = (
-            (ytd_mwh * self._eur_per_mwh).quantize(Decimal("0.01"))
-            if self._eur_per_mwh and self._eur_per_mwh > 0
-            else Decimal("0")
-        )
-
-        day_eur = day_eur_from_qh
+        qh_mwh = merge_qh_across_rows(rows, self._qh_slots)
+        qh_eur = merge_qh_eur_across_rows(rows, self._qh_slots)
+        if self._uses_flat_eur_rate():
+            hourly, day_mwh, day_eur = qh_series_to_hourly_points(
+                day, qh_mwh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
+            )
+        elif any(qh_eur):
+            hourly, day_mwh, day_eur = qh_mwh_eur_to_hourly_points(
+                day, qh_mwh, qh_eur, self._tz, n_slots=self._qh_slots
+            )
+        else:
+            hourly, day_mwh, day_eur = qh_series_to_hourly_points(
+                day, qh_mwh, self._tz, None, n_slots=self._qh_slots
+            )
         n = len(hourly)
         mean_mwh, mean_eur = mean_hourly_waste_from_headline(day_mwh, day_eur, n)
 
