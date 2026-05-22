@@ -63,6 +63,28 @@ On [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platfor
 
 See [DATA_CONTRACT.md](DATA_CONTRACT.md) for the expected SQL schema and [`.env.example`](.env.example) for all options.
 
+## Production data flow (Cube → Postgres)
+
+The site serves pages from **Postgres** only. A daily **Job** pulls from Cube and upserts the wide mart.
+
+1. Apply [`migrations/001_wasted_sun_qh_daily.sql`](migrations/001_wasted_sun_qh_daily.sql) on your database.
+2. Deploy the **Job** component (see [`.do/app.yaml`](.do/app.yaml)): run `wasted-sun-sync --full` once for backfill, then schedule `wasted-sun-sync --days 7` daily.
+3. Point the **web** service at Postgres (`WASTED_SUN_DATA_SOURCE=postgres`); omit `CUBE_API_*` from web env.
+
+```bash
+# Local / one-off sync (requires Cube + Postgres env)
+wasted-sun-sync --days 7
+wasted-sun-sync --full
+wasted-sun-sync --from 2024-01-01 --to 2024-06-15 --dry-run
+```
+
+| Component | Reads | Writes | Cube credentials |
+| --------- | ----- | ------ | ---------------- |
+| Web (gunicorn) | Postgres | — | No |
+| Job (`wasted-sun-sync`) | Cube | Postgres | Yes |
+
+Optional: `WASTED_SUN_PG_AS_OF_META_TABLE=wasted_sun_sync_meta` and `WASTED_SUN_PG_AS_OF_META_COLUMN=last_success_at` on the web service for “as of” in the UI.
+
 ## Configuration safety
 
 Postgres table/column names from the environment are validated; optional `WASTED_SUN_PG_AS_OF_QUERY` must be a single `SELECT` without semicolons or comments. Prefer **`WASTED_SUN_PG_AS_OF_META_TABLE`** + **`WASTED_SUN_PG_AS_OF_META_COLUMN`** for “as of” freshness. Plausible analytics env vars are validated at startup.

@@ -14,19 +14,20 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from wasted_sun.data.cube_scope import (
+    CUBE,
+    D_DATE,
+    D_MWH,
+    D_PERIOD,
+    D_PRICE_ESP,
+    D_REDISPATCH,
+    D_RESTRICTION,
+    wasted_sun_filters,
+)
 from wasted_sun.models import DailyMetrics, DayNotFoundError, HourlyPoint, mean_hourly_from_totals
 from wasted_sun.timeseries import hourly_mwh_from_qh, qh_series_to_hourly_points
 
 logger = logging.getLogger(__name__)
-
-# Fixed public WastedEnergy semantic layer (schema does not change).
-CUBE = "WastedEnergy"
-D_DATE = f"{CUBE}.DateDay"
-D_PERIOD = f"{CUBE}.QuarterPeriod"
-D_MWH = f"{CUBE}.EnergyMwh"
-D_PRICE_ESP = f"{CUBE}.PriceEspEurMwh"
-D_REDISPATCH = f"{CUBE}.RedispatchCode"
-D_RESTRICTION = f"{CUBE}.RestrictionTypeCode"
 
 _DEFAULT_QH_SLOTS = 100
 _LOAD_PATH = "/cubejs-api/v1/load"
@@ -253,27 +254,7 @@ class CubeMetricsProvider:
         self._ytd_timeout_sec = ytd_timeout_sec
 
     def _wasted_sun_filters(self) -> list[dict[str, Any]]:
-        """Row matches if RedispatchCode OR RestrictionTypeCode is in the allowlists."""
-        clauses: list[dict[str, Any]] = []
-        if self._redispatch_codes:
-            clauses.append(
-                {
-                    "member": D_REDISPATCH,
-                    "operator": "equals",
-                    "values": list(self._redispatch_codes),
-                }
-            )
-        if self._restriction_type_codes:
-            clauses.append(
-                {
-                    "member": D_RESTRICTION,
-                    "operator": "equals",
-                    "values": list(self._restriction_type_codes),
-                }
-            )
-        if len(clauses) == 1:
-            return clauses
-        return [{"or": clauses}]
+        return wasted_sun_filters(self._redispatch_codes, self._restriction_type_codes)
 
     def _load_day_rows(self, day: date) -> list[dict]:
         logger.info("cube load_day_rows start day=%s", day)

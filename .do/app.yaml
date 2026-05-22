@@ -1,0 +1,62 @@
+# DigitalOcean App Platform spec (reference).
+# Adjust name, region, repo, and env values for your account.
+#
+# Rollout:
+#   1. Apply migrations/001_wasted_sun_qh_daily.sql on Postgres
+#   2. Run Job once: wasted-sun-sync --full
+#   3. Web: WASTED_SUN_DATA_SOURCE=postgres, no CUBE_API_* on web
+
+name: wasted-sun
+region: ams
+
+services:
+  - name: web
+    dockerfile_path: Dockerfile
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    health_check:
+      http_path: /health
+    envs:
+      - key: FLASK_ENV
+        value: production
+      - key: WASTED_SUN_DATA_SOURCE
+        value: postgres
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: BASE_URL
+        scope: RUN_TIME
+      - key: WASTED_SUN_PG_AS_OF_META_TABLE
+        value: wasted_sun_sync_meta
+      - key: WASTED_SUN_PG_AS_OF_META_COLUMN
+        value: last_success_at
+
+jobs:
+  - name: cube-sync
+    kind: SCHEDULED
+    dockerfile_path: Dockerfile
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    schedule:
+      cron: "0 5 * * *"
+    run_command: wasted-sun-sync --days 7
+    envs:
+      - key: CUBE_API_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: CUBE_API_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: WASTED_SUN_CUBE_REDISPATCH_CODES
+        scope: RUN_TIME
+      - key: WASTED_SUN_CUBE_RESTRICTION_TYPE_CODES
+        scope: RUN_TIME
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: APP_TIMEZONE
+        value: Europe/Madrid

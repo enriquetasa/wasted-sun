@@ -86,6 +86,10 @@ def get_provider(app: Flask):
             raise ConfigurationError(
                 "Postgres mode requires DATABASE_URL (WASTED_SUN_DATA_SOURCE=postgres)."
             )
+        if cube_url:
+            app.logger.warning(
+                "WASTED_SUN_DATA_SOURCE=postgres: ignoring CUBE_API_URL on web tier"
+            )
     elif cube_url and not dsn:
         token = (cfg.get("CUBE_API_TOKEN") or "").strip()
         if not token:

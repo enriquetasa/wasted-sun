@@ -9,8 +9,11 @@ The app expects **one or more rows per `date_day`**, each with up to **100 quart
 | Calendar date | `date_day`         | `date` type (or timestamp castable to a day in queries). |
 | Quarter-hours | `qh_1_mwh` … `qh_N_mwh` | `numeric`. Slot *i* is the *i*-th 15-minute period from **local midnight** (Europe/Madrid). `N` defaults to **100** (`WASTED_SUN_PG_QH_SLOTS`; range **1–200**). |
 | YTD helper    | `total_mwh`        | Per-row daily total; **YTD** uses `SUM(total_mwh)` over `date_day` from 1 Jan through the selected day. Should be consistent with the qh columns for that row. |
+| Sync stamp    | `synced_at`        | Set by **`wasted-sun-sync`** on each upsert (optional for reads; useful for debugging). |
 
 Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restriction_type`, …) are ignored unless you filter upstream (e.g. a **VIEW** that only exposes solar-related rows).
+
+**Bootstrap schema:** apply [`migrations/001_wasted_sun_qh_daily.sql`](migrations/001_wasted_sun_qh_daily.sql) for the default mart and `wasted_sun_sync_meta` (freshness via `last_success_at`).
 
 ## Aggregation rules
 
@@ -43,11 +46,16 @@ Environment-driven SQL is limited to validated identifiers and, for `WASTED_SUN_
 
 Set `WASTED_SUN_PG_TABLE` to your table or **VIEW** name (default in config: `wasted_sun_qh_daily`).
 
-## Cube.js (`WastedEnergy` cube)
+## Cube.js (`WastedEnergy` cube) — ETL source only (production)
 
-When `CUBE_API_URL` and `CUBE_API_TOKEN` are set (or `WASTED_SUN_DATA_SOURCE=cube`), the app
-queries the **fixed** public `WastedEnergy` semantic model (dimensions only; schema does not
-change on the Cube side):
+**Production:** the public site reads **Postgres only**. Cube is used by the daily sync job
+(`wasted-sun-sync`) to materialize rows into `wasted_sun_qh_daily`. Do not set `CUBE_API_*` on
+the web component.
+
+For local debugging you may still set `WASTED_SUN_DATA_SOURCE=cube` to query Cube live.
+
+The sync job and optional live mode use the **fixed** public `WastedEnergy` semantic model
+(dimensions only; schema does not change on the Cube side):
 
 | Member | Role |
 | ------ | ---- |
