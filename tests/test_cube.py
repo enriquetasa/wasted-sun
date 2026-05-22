@@ -16,6 +16,7 @@ from wasted_sun.data.cube import (
     CubeClient,
     CubeMetricsProvider,
     _month_ranges,
+    cube_load_url,
     merge_cube_rows,
 )
 from wasted_sun.exceptions import ConfigurationError
@@ -187,6 +188,25 @@ def test_get_provider_requires_cube_credentials(app):
     app.config["CUBE_API_TOKEN"] = ""
     with pytest.raises(ConfigurationError):
         get_provider(app)
+
+
+def test_cube_load_url_host_root():
+    assert (
+        cube_load_url("https://cube.example")
+        == "https://cube.example/cubejs-api/v1/load"
+    )
+
+
+def test_cube_load_url_already_has_api_prefix():
+    assert (
+        cube_load_url("https://data-serving.example/cubejs-api/v1")
+        == "https://data-serving.example/cubejs-api/v1/load"
+    )
+
+
+def test_cube_load_url_already_full_load_path():
+    url = "https://cube.example/cubejs-api/v1/load"
+    assert cube_load_url(url) == url
 
 
 def test_cube_client_retries_continue_wait():

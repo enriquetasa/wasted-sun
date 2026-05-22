@@ -30,8 +30,26 @@ from wasted_sun.timeseries import hourly_mwh_from_qh, qh_series_to_hourly_points
 logger = logging.getLogger(__name__)
 
 _DEFAULT_QH_SLOTS = 100
-_LOAD_PATH = "/cubejs-api/v1/load"
+_CUBE_API_PREFIX = "/cubejs-api/v1"
+_LOAD_PATH = f"{_CUBE_API_PREFIX}/load"
 _DEFAULT_TIMEOUT_SEC = 90
+
+
+def cube_load_url(api_url: str) -> str:
+    """
+    Build the Cube /load endpoint from CUBE_API_URL.
+
+    Accepts either the deployment root (https://host) or a base that already
+    ends with /cubejs-api/v1 (common on gateways).
+    """
+    base = api_url.strip().rstrip("/")
+    if not base:
+        raise ValueError("CUBE_API_URL is empty")
+    if base.endswith(_LOAD_PATH):
+        return base
+    if base.endswith(_CUBE_API_PREFIX):
+        return f"{base}/load"
+    return f"{base}{_LOAD_PATH}"
 _CONTINUE_WAIT_MAX = 20
 _CONTINUE_WAIT_SLEEP_SEC = 1.0
 _YTD_MONTH_WORKERS = 6
@@ -105,8 +123,7 @@ class CubeClient:
     def __init__(
         self, api_url: str, api_token: str, *, timeout_sec: int = _DEFAULT_TIMEOUT_SEC
     ) -> None:
-        base = api_url.rstrip("/")
-        self._load_url = f"{base}{_LOAD_PATH}"
+        self._load_url = cube_load_url(api_url)
         self._token = api_token.strip()
         self._timeout = timeout_sec
 
