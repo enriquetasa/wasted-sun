@@ -50,3 +50,12 @@ def test_merge_qh_case_insensitive_keys():
     rows = [{"QH_1_MWH": 2}]
     acc = merge_qh_across_rows(rows, n_slots=1)
     assert acc[0] == Decimal("2")
+
+
+def test_qh_series_headline_uses_abs_net_for_negative_source():
+    tz = ZoneInfo("Europe/Madrid")
+    qh = [Decimal("-2")] * 4 + [Decimal("0")] * 96
+    hourly, dm, de = qh_series_to_hourly_points(date(2024, 1, 1), qh, tz, Decimal("10"))
+    assert hourly[0].mwh_unused == Decimal("-8")
+    assert dm == Decimal("8")
+    assert de == Decimal("80")

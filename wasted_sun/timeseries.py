@@ -8,6 +8,7 @@ from typing import Sequence
 from zoneinfo import ZoneInfo
 
 from wasted_sun.models import HourlyPoint
+from wasted_sun.waste_display import headline_waste_eur, headline_waste_mwh, net_mwh_from_qh
 
 # Default pipeline width (must match qh_N_mwh column count when not overridden).
 QH_SLOTS = 100
@@ -65,7 +66,7 @@ def qh_series_to_hourly_points(
     eur_per_mwh: Decimal | None,
     n_slots: int = QH_SLOTS,
 ) -> tuple[tuple[HourlyPoint, ...], Decimal, Decimal]:
-    """Return hourly points, day total MWh, day total EUR (EUR optional via rate)."""
+    """Return signed hourly points and positive headline day MWh/EUR totals."""
     hourly_mwh = hourly_mwh_from_qh(qh, n_slots=n_slots)
     day_start = datetime(day.year, day.month, day.day, 0, 0, tzinfo=tz)
     rate = eur_per_mwh if eur_per_mwh is not None else Decimal("0")
@@ -74,6 +75,7 @@ def qh_series_to_hourly_points(
         ts = day_start + timedelta(hours=h)
         eur = (mwh * rate).quantize(Decimal("0.01")) if rate else Decimal("0")
         points.append(HourlyPoint(bucket_start=ts, mwh_unused=mwh, eur_waste=eur))
-    day_total_mwh = sum(qh[:n_slots], start=Decimal("0")) if qh else Decimal("0")
-    day_total_eur = (day_total_mwh * rate).quantize(Decimal("0.01")) if rate else Decimal("0")
+    net = net_mwh_from_qh(qh, n_slots) if qh else Decimal("0")
+    day_total_mwh = headline_waste_mwh(net)
+    day_total_eur = headline_waste_eur(net, eur_per_mwh)
     return tuple(points), day_total_mwh, day_total_eur
