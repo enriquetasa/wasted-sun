@@ -30,12 +30,12 @@
     </article>
     {% if show_eur %}
     <article class="kpi-card kpi-card--money">
-      <h3 class="kpi-card__label">{% trans %}Illustrative € equivalent{% endtrans %}</h3>
+      <h3 class="kpi-card__label">{% trans %}Market value (€){% endtrans %}</h3>
       <p class="kpi-card__value">
         <span class="no-js-only">{{ fmt_eur(metrics.day_total_eur) }}</span>
         <span class="js-only kpi-card__number" data-kpi-animate data-target="{{ metrics.day_total_eur }}" data-final="{{ fmt_eur(metrics.day_total_eur) }}" data-kind="eur">{{ zero_eur }}</span>
       </p>
-      <p class="kpi-card__hint">{% trans %}This site's €/MWh. The waste is not a bill or market price, but a serious order of magnitude.{% endtrans %}</p>
+      <p class="kpi-card__hint">{% trans %}OMIE peninsula wholesale prices per quarter-hour, applied to unused MWh. Not a bill or settlement, but real market scale.{% endtrans %}</p>
     </article>
     {% endif %}
   </div>
@@ -60,7 +60,7 @@
       <span class="no-js-only">{{ fmt_eur(metrics.ytd_eur) }}</span>
       <span class="js-only" data-kpi-animate data-target="{{ metrics.ytd_eur }}" data-final="{{ fmt_eur(metrics.ytd_eur) }}" data-kind="eur">{{ zero_eur }}</span>
     </span>
-    {% trans %}at that illustrative €/MWh rate.{% endtrans %}
+    {% trans %}at OMIE peninsula prices.{% endtrans %}
     {% else %}
     <span class="kpi-ytd-anim">
       <span class="no-js-only">{{ fmt_mwh(metrics.ytd_mwh) }}</span>
@@ -125,8 +125,8 @@
   <p>
     {% trans homes=fmt_int(city_homes_equiv), kwh=household_day_kwh %}
     Today's unused solar total is in the ballpark of the daily electricity of about
-    <strong>{{ homes }}</strong> typical homes, using an illustrative {{ kwh }} kWh per home per day
-    for scale (not a census count - see methodology).
+    <strong>{{ homes }}</strong> typical homes, using a reference {{ kwh }} kWh per home per day
+    for scale (not a census count — see methodology).
     {% endtrans %}
   </p>
 </section>
@@ -143,23 +143,25 @@
   </p>
   <p>
     {% trans %}
-    The chart aggregates those quarter-hours into 24 hourly bars. Any slots
-    beyond the first 96 are folded into the last hour of the day.     Headline day totals and year-to-date figures show the <strong>absolute</strong> net waste
-    (upstream data often stores unused solar as negative MWh). The chart keeps <strong>signed</strong>
-    hourly bars so you can see which hours wasted energy and which did not. “So far this year” sums
-    the absolute daily net from 1st January through the selected date. The average “per hour” line
-    uses that headline day total divided by 24.
+    The chart aggregates those quarter-hours into 24 hourly bars. Any slots beyond the first 96 are
+    folded into the last hour of the day. Headline day totals and year-to-date figures show the
+    <strong>absolute</strong> net waste (upstream data often stores unused solar as negative MWh).
+    The chart keeps <strong>signed</strong> hourly bars so you can see which hours wasted energy
+    and which did not. “So far this year” sums the absolute daily net from 1 January through the
+    selected date. The average “per hour” line uses that headline day total divided by 24.
     {% endtrans %}
   </p>
   <p>
     {% trans %}
-    Euro amounts use peninsula prices from the data pipeline (Cube <code>PriceEspEurMwh</code> at sync time) unless the site operator sets a flat illustrative €/MWh override. They are not a market settlement, but they show that unused MWh are not economically neutral.
+    Euro amounts use OMIE peninsula wholesale prices (€/MWh) for each quarter-hour, updated daily
+    from the data pipeline. They are not a bill or settlement, but they show that unused MWh carry
+    real market cost.
     {% endtrans %}
   </p>
   <h3>{% trans %}Household analogy{% endtrans %}</h3>
   <p>
     {% trans %}
-    The household comparison uses a configurable illustrative kWh/day figure to give an intuitive
+    The household comparison uses a configurable reference kWh/day figure to give an intuitive
     scale.
     {% endtrans %}
   </p>
@@ -187,9 +189,8 @@
   </p>
   <p>
     {% trans %}
-    I care strongly about this topic, including through my role as Head of Technology at Octopus Energy
-    Spain - but unless stated otherwise, the analysis and opinions here are mine alone and do not represent
-    my employer.
+    I care strongly about this topic, including through my role at Octopus Energy Spain — but unless
+    stated otherwise, the analysis and opinions here are mine alone and do not represent my employer.
     {% endtrans %}
   </p>
 </section>

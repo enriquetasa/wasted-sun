@@ -25,7 +25,7 @@ Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restri
 4. **Chart:** Quarter-hours are rolled into **24 hourly** bars with **signed** values (negative = waste in source convention; positive or near-zero = less or no waste in that hour): qh 1–4 → hour 0, 5–8 → hour 1, …, 93–96 → hour 23. Values in **qh_97–qh_100** (if present) are **added to hour 23** so the full day’s energy appears in the profile.
 5. **Headline “per hour”:** Headline day total MWh ÷ 24 (not the mean of signed hourly bars).
 6. **YTD:** `SELECT COALESCE(SUM(ABS(total_mwh)),0) … WHERE date_day BETWEEN Jan-1 AND selected_day`.
-7. **Euros:** After sync, **`qh_*_eur`** and **`total_eur`** come from Cube **`PriceEspEurMwh`** (same rules as live Cube). The app uses those when **`WASTED_SUN_EUR_PER_MWH`** is unset or zero. Set **`WASTED_SUN_EUR_PER_MWH` &gt; 0** to override with a flat illustrative €/MWh. **YTD €** uses `SUM(ABS(total_eur))` unless the flat rate is set (`YTD MWh × rate`). Apply [`migrations/002_wasted_sun_qh_eur.sql`](migrations/002_wasted_sun_qh_eur.sql) and re-sync after upgrading.
+7. **Euros:** After sync, **`qh_*_eur`** and **`total_eur`** come from peninsula **OMIE wholesale €/MWh** (`PriceEspEurMwh` in Cube). The app uses those when **`WASTED_SUN_EUR_PER_MWH`** is unset or zero. Set **`WASTED_SUN_EUR_PER_MWH` &gt; 0** only to override with a single flat €/MWh. **YTD €** uses `SUM(ABS(total_eur))` unless the flat rate is set (`YTD MWh × rate`). Apply [`migrations/002_wasted_sun_qh_eur.sql`](migrations/002_wasted_sun_qh_eur.sql) and re-sync after upgrading.
 
 8. **Day total vs YTD:** **`total_mwh`** in the table should match the algebraic sum of **`qh_*`**. The **headline** uses **`ABS(total_mwh)`**; **YTD** sums those absolute daily values. If `total_mwh` drifts from the qh sum, KPIs will look inconsistent—fix upstream or re-sync.
 
@@ -65,7 +65,7 @@ The sync job and optional live mode use the **fixed** public `WastedEnergy` sema
 | `WastedEnergy.DateDay` | Calendar day (`YYYY-MM-DD` string) |
 | `WastedEnergy.QuarterPeriod` | 1-based quarter-hour index (1 … `WASTED_SUN_PG_QH_SLOTS`) |
 | `WastedEnergy.EnergyMwh` | MWh for that period |
-| `WastedEnergy.PriceEspEurMwh` | Illustrative €/MWh for that row (peninsula) |
+| `WastedEnergy.PriceEspEurMwh` | OMIE peninsula wholesale €/MWh for that row |
 
 **Wasted-sun scope:** Not every redispatch/restriction row is unused solar. Set at least one of:
 
