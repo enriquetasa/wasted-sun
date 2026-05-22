@@ -8,7 +8,8 @@ import psycopg
 from psycopg import sql
 from psycopg.rows import dict_row
 
-from wasted_sun.models import DailyMetrics, DayNotFoundError, mean_hourly_from_totals
+from wasted_sun.models import DailyMetrics, DayNotFoundError
+from wasted_sun.waste_display import mean_hourly_waste_from_headline
 from wasted_sun.sql_guard import (
     validate_as_of_select,
     validate_pg_identifier,
@@ -126,7 +127,7 @@ class PostgresMetricsProvider:
         y0 = date(through.year, 1, 1)
         tm = sql.Identifier(self._total_mwh_col)
         q = sql.SQL(
-            "SELECT COALESCE(SUM({tm}), 0) AS s FROM {tbl} "
+            "SELECT COALESCE(SUM(ABS({tm})), 0) AS s FROM {tbl} "
             "WHERE {dc} >= %s AND {dc} <= %s"
         ).format(tm=tm, tbl=self._tbl(), dc=self._dc())
         with conn.cursor(row_factory=dict_row) as cur:
@@ -202,7 +203,7 @@ class PostgresMetricsProvider:
 
         day_eur = day_eur_from_qh
         n = len(hourly)
-        mean_mwh, mean_eur = mean_hourly_from_totals(day_mwh, day_eur, n)
+        mean_mwh, mean_eur = mean_hourly_waste_from_headline(day_mwh, day_eur, n)
 
         return DailyMetrics(
             day=day,

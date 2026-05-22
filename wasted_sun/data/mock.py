@@ -6,7 +6,8 @@ from decimal import Decimal
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
-from wasted_sun.models import DailyMetrics, DayNotFoundError, mean_hourly_from_totals
+from wasted_sun.models import DailyMetrics, DayNotFoundError
+from wasted_sun.waste_display import mean_hourly_waste_from_headline
 from wasted_sun.timeseries import QH_SLOTS, qh_series_to_hourly_points
 
 
@@ -102,7 +103,7 @@ class MockMetricsProvider:
             day, qh, self._tz, self._eur_per_mwh, n_slots=self._qh_slots
         )
         n = len(hourly)
-        mean_mwh, mean_eur = mean_hourly_from_totals(day_mwh, day_eur, n)
+        mean_mwh, mean_eur = mean_hourly_waste_from_headline(day_mwh, day_eur, n)
         ytd_mwh, ytd_eur = self._ytd_totals(day)
 
         as_of = datetime.now(self._tz).replace(minute=0, second=0, microsecond=0)
