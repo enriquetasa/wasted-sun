@@ -15,6 +15,10 @@ class Config:
     BABEL_DEFAULT_LOCALE = "es"
 
     BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000").rstrip("/")
+    # Canonical URL in social share links (defaults to production site).
+    SHARE_SITE_URL = os.environ.get("WASTED_SUN_SHARE_SITE_URL", "https://wasted.energy").rstrip(
+        "/"
+    )
     USE_MOCK_DATA = _bool("USE_MOCK_DATA", default=False)
     DATABASE_URL = os.environ.get("DATABASE_URL")
 

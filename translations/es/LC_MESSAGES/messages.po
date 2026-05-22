@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wasted-sun 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 12:37+0200\n"
+"POT-Creation-Date: 2026-05-22 12:42+0200\n"
 "PO-Revision-Date: 2026-03-23 15:30+0100\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -16,65 +16,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:119 wasted_sun/views.py:152
+#: wasted_sun/views.py:85
+#, python-format
+msgid ""
+"On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about"
+" %(day_eur)s at market prices. So far this year: %(ytd)s. %(url)s"
+msgstr ""
+"El %(day)s, España dejó %(day_mwh)s de solar sin usar en la península—unos"
+" %(day_eur)s a precios de mercado. Llevamos %(ytd)s en lo que va de año. "
+"%(url)s"
+
+#: wasted_sun/views.py:96
+#, python-format
+msgid ""
+"On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about"
+" %(day_eur)s at market prices. %(url)s"
+msgstr ""
+"El %(day)s, España dejó %(day_mwh)s de solar sin usar en la península—unos"
+" %(day_eur)s a precios de mercado. %(url)s"
+
+#: wasted_sun/views.py:106
+#, python-format
+msgid ""
+"On %(day)s, the peninsula wasted %(day_mwh)s of solar power. Running "
+"total this year: %(ytd)s. %(url)s"
+msgstr ""
+"El %(day)s, la península desperdició %(day_mwh)s de energía solar. "
+"Llevamos %(ytd)s en lo que va de año. %(url)s"
+
+#: wasted_sun/views.py:115
+#, python-format
+msgid "On %(day)s, Spain wasted %(day_mwh)s of solar on the peninsula. %(url)s"
+msgstr ""
+"El %(day)s, España desperdició %(day_mwh)s de solar en la península. "
+"%(url)s"
+
+#: wasted_sun/views.py:173 wasted_sun/views.py:206
 msgid "Invalid database configuration. Check environment variables."
 msgstr "Configuración de base de datos no válida. Revisa las variables de entorno."
 
-#: wasted_sun/views.py:122 wasted_sun/views.py:168
+#: wasted_sun/views.py:176 wasted_sun/views.py:222
 msgid "No energy data loaded yet."
 msgstr "Aún no hay datos de energía cargados."
 
-#: wasted_sun/views.py:128 wasted_sun/views.py:176
+#: wasted_sun/views.py:182 wasted_sun/views.py:230
 msgid "Database temporarily unavailable."
 msgstr "Base de datos temporalmente no disponible."
 
-#: wasted_sun/views.py:144
+#: wasted_sun/views.py:198
 msgid "Invalid date."
 msgstr "Fecha no válida."
 
-#: wasted_sun/views.py:163 wasted_sun/views.py:166
+#: wasted_sun/views.py:217 wasted_sun/views.py:220
 msgid "No data for this date."
 msgstr "No hay datos para esta fecha."
 
-#: wasted_sun/views.py:165
+#: wasted_sun/views.py:219
 msgid "No data before coverage starts."
 msgstr "No hay datos anteriores al inicio de la serie."
-
-#: wasted_sun/views.py:202
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s "
-"(OMIE). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
-msgstr ""
-"%(day)s — %(day_mwh)s de energía solar no utilizada (península); "
-"~%(day_eur)s (OMIE). ~%(eur_h)s/h de media. Acumulado: %(ytd)s. %(url)s"
-
-#: wasted_sun/views.py:214
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s "
-"(OMIE). ~%(eur_h)s/h avg. %(url)s"
-msgstr ""
-"%(day)s — %(day_mwh)s de energía solar no utilizada (península); "
-"~%(day_eur)s (OMIE). ~%(eur_h)s/h de media. %(url)s"
-
-#: wasted_sun/views.py:225
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
-" YTD: %(ytd)s. %(url)s"
-msgstr ""
-"%(day)s — %(day_mwh)s de energía solar no utilizada (península). "
-"~%(mwh_h)s/h de media. Acumulado: %(ytd)s. %(url)s"
-
-#: wasted_sun/views.py:236
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
-" %(url)s"
-msgstr ""
-"%(day)s — %(day_mwh)s de energía solar no utilizada (península). "
-"~%(mwh_h)s/h de media. %(url)s"
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22
 #: wasted_sun/templates/day.html:2 wasted_sun/templates/error.html:2
@@ -130,9 +129,9 @@ msgid ""
 "OMIE peninsula wholesale prices per quarter-hour, applied to unused MWh. "
 "Not a bill or settlement, but real market scale."
 msgstr ""
-"Precios mayoristas OMIE de la península por cuarto de hora, aplicados a los"
-" MWh no utilizados. No es una factura ni una liquidación, pero refleja la "
-"escala real del mercado."
+"Precios mayoristas OMIE de la península por cuarto de hora, aplicados a "
+"los MWh no utilizados. No es una factura ni una liquidación, pero refleja"
+" la escala real del mercado."
 
 #: wasted_sun/templates/day.html:44
 #, python-format
@@ -320,9 +319,9 @@ msgid ""
 msgstr ""
 "\n"
 "Los importes en euros usan precios mayoristas OMIE de la península "
-"(€/MWh) en cada cuarto de hora, actualizados a diario desde el pipeline de"
-" datos. No son una factura ni una liquidación, pero muestran que los MWh "
-"no utilizados tienen un coste de mercado real.\n"
+"(€/MWh) en cada cuarto de hora, actualizados a diario desde el pipeline "
+"de datos. No son una factura ni una liquidación, pero muestran que los "
+"MWh no utilizados tienen un coste de mercado real.\n"
 "    "
 
 #: wasted_sun/templates/day.html:161
@@ -398,8 +397,8 @@ msgid ""
 msgstr ""
 "\n"
 "Este tema me importa profundamente, también por mi trabajo en Octopus "
-"Energy España, pero salvo que se indique lo contrario, el análisis y las"
-" opiniones aquí son exclusivamente mías y no representan a mi empresa.\n"
+"Energy España, pero salvo que se indique lo contrario, el análisis y las "
+"opiniones aquí son exclusivamente mías y no representan a mi empresa.\n"
 "    "
 
 #: wasted_sun/templates/day.html:199
@@ -486,4 +485,13 @@ msgstr "Volver al último"
 
 #~ msgid "Back to today"
 #~ msgstr "Volver a hoy"
+
+#~ msgid ""
+#~ "%(day)s — %(day_mwh)s unused solar "
+#~ "(Spanish peninsula). ~%(mwh_h)s/h avg. YTD:"
+#~ " %(ytd)s. %(url)s"
+#~ msgstr ""
+#~ "%(day)s — %(day_mwh)s de energía solar"
+#~ " no utilizada (península). ~%(mwh_h)s/h de"
+#~ " media. Acumulado: %(ytd)s. %(url)s"
 

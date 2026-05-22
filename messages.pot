@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-22 12:37+0200\n"
+"POT-Creation-Date: 2026-05-22 12:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,56 +17,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: wasted_sun/views.py:119 wasted_sun/views.py:152
+#: wasted_sun/views.py:85
+#, python-format
+msgid ""
+"On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about"
+" %(day_eur)s at market prices. So far this year: %(ytd)s. %(url)s"
+msgstr ""
+
+#: wasted_sun/views.py:96
+#, python-format
+msgid ""
+"On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about"
+" %(day_eur)s at market prices. %(url)s"
+msgstr ""
+
+#: wasted_sun/views.py:106
+#, python-format
+msgid ""
+"On %(day)s, the peninsula wasted %(day_mwh)s of solar power. Running "
+"total this year: %(ytd)s. %(url)s"
+msgstr ""
+
+#: wasted_sun/views.py:115
+#, python-format
+msgid "On %(day)s, Spain wasted %(day_mwh)s of solar on the peninsula. %(url)s"
+msgstr ""
+
+#: wasted_sun/views.py:173 wasted_sun/views.py:206
 msgid "Invalid database configuration. Check environment variables."
 msgstr ""
 
-#: wasted_sun/views.py:122 wasted_sun/views.py:168
+#: wasted_sun/views.py:176 wasted_sun/views.py:222
 msgid "No energy data loaded yet."
 msgstr ""
 
-#: wasted_sun/views.py:128 wasted_sun/views.py:176
+#: wasted_sun/views.py:182 wasted_sun/views.py:230
 msgid "Database temporarily unavailable."
 msgstr ""
 
-#: wasted_sun/views.py:144
+#: wasted_sun/views.py:198
 msgid "Invalid date."
 msgstr ""
 
-#: wasted_sun/views.py:163 wasted_sun/views.py:166
+#: wasted_sun/views.py:217 wasted_sun/views.py:220
 msgid "No data for this date."
 msgstr ""
 
-#: wasted_sun/views.py:165
+#: wasted_sun/views.py:219
 msgid "No data before coverage starts."
-msgstr ""
-
-#: wasted_sun/views.py:202
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s "
-"(OMIE). ~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
-msgstr ""
-
-#: wasted_sun/views.py:214
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s "
-"(OMIE). ~%(eur_h)s/h avg. %(url)s"
-msgstr ""
-
-#: wasted_sun/views.py:225
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
-" YTD: %(ytd)s. %(url)s"
-msgstr ""
-
-#: wasted_sun/views.py:236
-#, python-format
-msgid ""
-"%(day)s — %(day_mwh)s unused solar (Spanish peninsula). ~%(mwh_h)s/h avg."
-" %(url)s"
 msgstr ""
 
 #: wasted_sun/templates/base.html:6 wasted_sun/templates/base.html:22

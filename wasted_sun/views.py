@@ -66,6 +66,60 @@ def _show_ytd() -> bool:
     return True
 
 
+def _share_page_url(day: date) -> str:
+    base = (current_app.config.get("SHARE_SITE_URL") or "https://wasted.energy").rstrip("/")
+    return f"{base}/{day.isoformat()}/"
+
+
+def _build_share_text(
+    day: date,
+    metrics,
+    *,
+    show_eur: bool,
+    show_ytd: bool,
+    share_url: str,
+) -> str:
+    day_label = day.isoformat()
+    if show_eur and show_ytd:
+        return _(
+            "On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about "
+            "%(day_eur)s at market prices. So far this year: %(ytd)s. %(url)s"
+        ) % {
+            "day": day_label,
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "day_eur": fmt_eur(metrics.day_total_eur),
+            "ytd": fmt_eur(metrics.ytd_eur),
+            "url": share_url,
+        }
+    if show_eur:
+        return _(
+            "On %(day)s, Spain left %(day_mwh)s of solar unused on the peninsula—about "
+            "%(day_eur)s at market prices. %(url)s"
+        ) % {
+            "day": day_label,
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "day_eur": fmt_eur(metrics.day_total_eur),
+            "url": share_url,
+        }
+    if show_ytd:
+        return _(
+            "On %(day)s, the peninsula wasted %(day_mwh)s of solar power. Running total "
+            "this year: %(ytd)s. %(url)s"
+        ) % {
+            "day": day_label,
+            "day_mwh": fmt_mwh(metrics.day_total_mwh),
+            "ytd": fmt_mwh(metrics.ytd_mwh),
+            "url": share_url,
+        }
+    return _(
+        "On %(day)s, Spain wasted %(day_mwh)s of solar on the peninsula. %(url)s"
+    ) % {
+        "day": day_label,
+        "day_mwh": fmt_mwh(metrics.day_total_mwh),
+        "url": share_url,
+    }
+
+
 def _show_eur(metrics=None) -> bool:
     rate = current_app.config.get("EUR_PER_MWH")
     if rate is not None and rate > 0:
@@ -191,56 +245,12 @@ def day_view(day_str: str):
     prev_ok = prev_day >= earliest
     next_ok = next_day <= latest_day
 
-    share_path = f"{day.isoformat()}/"
-    share_url = f"{current_app.config['BASE_URL'].rstrip('/')}/{share_path}"
-
+    share_url = _share_page_url(day)
     show_eur = _show_eur(metrics)
     show_ytd = _show_ytd()
-    if show_eur:
-        if show_ytd:
-            share_text = _(
-                "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s (OMIE). "
-                "~%(eur_h)s/h avg. YTD: %(ytd)s. %(url)s"
-            ) % {
-                "day": day.isoformat(),
-                "day_mwh": fmt_mwh(metrics.day_total_mwh),
-                "day_eur": fmt_eur(metrics.day_total_eur),
-                "eur_h": fmt_eur(metrics.mean_hourly_eur),
-                "ytd": fmt_eur(metrics.ytd_eur),
-                "url": share_url,
-            }
-        else:
-            share_text = _(
-                "%(day)s — %(day_mwh)s unused solar (Spanish peninsula); ~%(day_eur)s (OMIE). "
-                "~%(eur_h)s/h avg. %(url)s"
-            ) % {
-                "day": day.isoformat(),
-                "day_mwh": fmt_mwh(metrics.day_total_mwh),
-                "day_eur": fmt_eur(metrics.day_total_eur),
-                "eur_h": fmt_eur(metrics.mean_hourly_eur),
-                "url": share_url,
-            }
-    elif show_ytd:
-        share_text = _(
-            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). "
-            "~%(mwh_h)s/h avg. YTD: %(ytd)s. %(url)s"
-        ) % {
-            "day": day.isoformat(),
-            "day_mwh": fmt_mwh(metrics.day_total_mwh),
-            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
-            "ytd": fmt_mwh(metrics.ytd_mwh),
-            "url": share_url,
-        }
-    else:
-        share_text = _(
-            "%(day)s — %(day_mwh)s unused solar (Spanish peninsula). "
-            "~%(mwh_h)s/h avg. %(url)s"
-        ) % {
-            "day": day.isoformat(),
-            "day_mwh": fmt_mwh(metrics.day_total_mwh),
-            "mwh_h": fmt_mwh(metrics.mean_hourly_mwh),
-            "url": share_url,
-        }
+    share_text = _build_share_text(
+        day, metrics, show_eur=show_eur, show_ytd=show_ytd, share_url=share_url
+    )
 
     linkedin = "https://www.linkedin.com/shareArticle?" + urlencode(
         {"url": share_url, "text": share_text}, quote_via=quote
