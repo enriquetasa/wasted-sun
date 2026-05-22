@@ -421,8 +421,21 @@ section.prose strong {
   color: var(--text);
 }
 
-.chart-wrap {
+.chart-figure {
   margin: 2rem 0;
+}
+
+.chart-caption {
+  margin: 0.75rem auto 0;
+  max-width: 36rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: center;
+}
+
+.chart-wrap {
+  margin: 0;
   height: 240px;
   position: relative;
   padding: 0.5rem 0;

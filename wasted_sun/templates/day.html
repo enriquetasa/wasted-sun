@@ -73,9 +73,17 @@
   <p class="meta-asof">{% trans ts=metrics.as_of.strftime('%Y-%m-%d %H:%M %Z') %}Data as of {{ ts }}{% endtrans %}</p>
 </section>
 
-<div class="chart-wrap">
-  <canvas id="hourly-chart" aria-label="{% trans %}Hourly unused solar (MWh){% endtrans %}"></canvas>
-</div>
+<figure class="chart-figure">
+  <div class="chart-wrap">
+    <canvas id="hourly-chart" aria-label="{% trans %}Hourly unused solar (MWh){% endtrans %}"></canvas>
+  </div>
+  <figcaption class="chart-caption">
+    {% trans %}
+    Each bar is one hour. Negative values mean solar was wasted then; zero or positive values
+    mean little or no waste in that hour.
+    {% endtrans %}
+  </figcaption>
+</figure>
 
 <section class="share-row">
   <h2>{% trans %}Share if this should get more attention{% endtrans %}</h2>
