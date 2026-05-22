@@ -20,11 +20,11 @@ class DailyMetrics:
 
     day: date
     hourly: tuple[HourlyPoint, ...]
-    day_total_mwh: Decimal
+    day_total_mwh: Decimal  # positive headline waste magnitude
     day_total_eur: Decimal
-    ytd_mwh: Decimal
+    ytd_mwh: Decimal  # sum of daily headline magnitudes
     ytd_eur: Decimal
-    mean_hourly_mwh: Decimal
+    mean_hourly_mwh: Decimal  # headline day total / 24
     mean_hourly_eur: Decimal
     as_of: datetime
     earliest_available_date: date

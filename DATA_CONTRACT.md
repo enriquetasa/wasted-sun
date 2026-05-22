@@ -8,7 +8,7 @@ The app expects **one or more rows per `date_day`**, each with up to **100 quart
 | ------------- | ------------------ | ----- |
 | Calendar date | `date_day`         | `date` type (or timestamp castable to a day in queries). |
 | Quarter-hours | `qh_1_mwh` … `qh_N_mwh` | `numeric`. Slot *i* is the *i*-th 15-minute period from **local midnight** (Europe/Madrid). `N` defaults to **100** (`WASTED_SUN_PG_QH_SLOTS`; range **1–200**). |
-| YTD helper    | `total_mwh`        | Per-row daily total; **YTD** uses `SUM(total_mwh)` over `date_day` from 1 Jan through the selected day. Should be consistent with the qh columns for that row. |
+| YTD helper    | `total_mwh`        | Per-row daily **net** (algebraic sum of `qh_*`, often negative in upstream REE/Cube data). **YTD** in the app uses `SUM(ABS(total_mwh))` from 1 Jan through the selected day. Should equal the algebraic sum of qh columns for that row. |
 | Sync stamp    | `synced_at`        | Set by **`wasted-sun-sync`** on each upsert (optional for reads; useful for debugging). |
 
 Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restriction_type`, …) are ignored unless you filter upstream (e.g. a **VIEW** that only exposes solar-related rows).
@@ -18,13 +18,14 @@ Other columns (`i3dia_id`, `redispatch`, `type`, `direction`, `concept`, `restri
 ## Aggregation rules
 
 1. **Same-day merge:** All rows with the same `date_day` are merged by **summing** each `qh_*_mwh` bucket independently.
-2. **Day total (MWh):** Sum of all merged quarter-hour values for that day.
-3. **Chart:** Quarter-hours are rolled into **24 hourly** bars: qh 1–4 → hour 0, 5–8 → hour 1, …, 93–96 → hour 23. Values in **qh_97–qh_100** (if present) are **added to hour 23** so the full day’s energy appears in the profile.
-4. **Headline “per hour”:** Mean of those 24 hourly bar values (= day total MWh ÷ 24).
-5. **YTD:** `SELECT COALESCE(SUM(total_mwh),0) … WHERE date_day BETWEEN Jan-1 AND selected_day`.
-6. **Euros:** Not stored in this schema. Set **`WASTED_SUN_EUR_PER_MWH`** to show illustrative EUR (day, YTD, share text). Omit it (or set to **`0`**) for MWh-only. **Mock / no `DATABASE_URL`:** if the variable is **unset**, the app applies a **default demo rate** (`52` €/MWh) so local UI still shows euros; set **`WASTED_SUN_EUR_PER_MWH=0`** to force MWh-only locally.
+2. **Day total (MWh) in storage:** Algebraic sum of merged quarter-hour values (signed).
+3. **Day total (MWh) on the site:** **Absolute value** of that net — headline KPIs, share text, and household analogy show positive “wasted” magnitude.
+4. **Chart:** Quarter-hours are rolled into **24 hourly** bars with **signed** values (negative = waste in source convention; positive or near-zero = less or no waste in that hour): qh 1–4 → hour 0, 5–8 → hour 1, …, 93–96 → hour 23. Values in **qh_97–qh_100** (if present) are **added to hour 23** so the full day’s energy appears in the profile.
+5. **Headline “per hour”:** Headline day total MWh ÷ 24 (not the mean of signed hourly bars).
+6. **YTD:** `SELECT COALESCE(SUM(ABS(total_mwh)),0) … WHERE date_day BETWEEN Jan-1 AND selected_day`.
+7. **Euros:** Not stored in this schema. Set **`WASTED_SUN_EUR_PER_MWH`** to show illustrative EUR (day, YTD, share text). Omit it (or set to **`0`**) for MWh-only. **Mock / no `DATABASE_URL`:** if the variable is **unset**, the app applies a **default demo rate** (`52` €/MWh) so local UI still shows euros; set **`WASTED_SUN_EUR_PER_MWH=0`** to force MWh-only locally.
 
-7. **Day total vs YTD:** The **headline day total** is the **sum of merged `qh_*`**. **YTD** is **`SUM(total_mwh)`** in SQL. If those disagree in your source data, KPIs will look inconsistent—fix upstream or align columns.
+8. **Day total vs YTD:** **`total_mwh`** in the table should match the algebraic sum of **`qh_*`**. The **headline** uses **`ABS(total_mwh)`**; **YTD** sums those absolute daily values. If `total_mwh` drifts from the qh sum, KPIs will look inconsistent—fix upstream or re-sync.
 
 ## `as_of` timestamp
 

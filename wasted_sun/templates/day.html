@@ -144,10 +144,11 @@
   <p>
     {% trans %}
     The chart aggregates those quarter-hours into 24 hourly bars. Any slots
-    beyond the first 96 are folded into the last hour of the day. Day totals are the sum of all
-    quarter-hour values. “So far this year” uses the sum of MWh across rows from 1st January through the
-    selected date. The average “per hour” figure is the mean of the 24 hourly bars (equivalently the
-    day total divided by 24).
+    beyond the first 96 are folded into the last hour of the day.     Headline day totals and year-to-date figures show the <strong>absolute</strong> net waste
+    (upstream data often stores unused solar as negative MWh). The chart keeps <strong>signed</strong>
+    hourly bars so you can see which hours wasted energy and which did not. “So far this year” sums
+    the absolute daily net from 1st January through the selected date. The average “per hour” line
+    uses that headline day total divided by 24.
     {% endtrans %}
   </p>
   <p>
@@ -239,6 +240,7 @@
             ticks: { color: tick },
             grid: { color: grid },
             title: { display: true, text: {{ _('MWh')|tojson }}, color: tick },
+            beginAtZero: false,
           },
         },
       },
