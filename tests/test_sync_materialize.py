@@ -18,6 +18,9 @@ def test_day_row_from_cube_rows_merges_periods():
     assert wide["qh_1_mwh"] == Decimal("3")
     assert wide["qh_2_mwh"] == Decimal("0.5")
     assert wide["total_mwh"] == Decimal("3.5")
+    assert wide["qh_1_eur"] == Decimal("30.00000")
+    assert wide["qh_2_eur"] == Decimal("10.00000")
+    assert wide["total_eur"] == Decimal("40.00000")
 
 
 def test_day_row_from_cube_rows_empty_returns_none():

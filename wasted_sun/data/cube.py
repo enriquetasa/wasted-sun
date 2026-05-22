@@ -24,14 +24,9 @@ from wasted_sun.data.cube_scope import (
     D_RESTRICTION,
     wasted_sun_filters,
 )
-from wasted_sun.models import DailyMetrics, DayNotFoundError, HourlyPoint
-from wasted_sun.waste_display import (
-    headline_waste_eur,
-    headline_waste_mwh,
-    mean_hourly_waste_from_headline,
-    net_mwh_from_qh,
-)
-from wasted_sun.timeseries import hourly_mwh_from_qh, qh_series_to_hourly_points
+from wasted_sun.models import DailyMetrics, DayNotFoundError
+from wasted_sun.waste_display import headline_waste_eur, mean_hourly_waste_from_headline
+from wasted_sun.timeseries import hourly_mwh_from_qh, qh_mwh_eur_to_hourly_points, qh_series_to_hourly_points
 
 logger = logging.getLogger(__name__)
 
@@ -103,28 +98,6 @@ def merge_cube_rows(
         if mwh and price:
             qh_eur[i] += (mwh * price).quantize(Decimal("0.00001"))
     return qh_mwh, qh_eur
-
-
-def _hourly_points_from_slots(
-    day: date,
-    qh_mwh: list[Decimal],
-    qh_eur: list[Decimal],
-    tz: ZoneInfo,
-    n_slots: int,
-) -> tuple[tuple[HourlyPoint, ...], Decimal, Decimal]:
-    hourly_mwh = hourly_mwh_from_qh(qh_mwh, n_slots=n_slots)
-    hourly_eur_vals = hourly_mwh_from_qh(qh_eur, n_slots=n_slots)
-    day_start = datetime(day.year, day.month, day.day, 0, 0, tzinfo=tz)
-    points: list[HourlyPoint] = []
-    for h, mwh in enumerate(hourly_mwh):
-        ts = day_start + timedelta(hours=h)
-        eur = hourly_eur_vals[h].quantize(Decimal("0.01"))
-        points.append(HourlyPoint(bucket_start=ts, mwh_unused=mwh, eur_waste=eur))
-    net_mwh = net_mwh_from_qh(qh_mwh, n_slots)
-    net_eur = sum(qh_eur[:n_slots], start=Decimal("0"))
-    day_mwh = headline_waste_mwh(net_mwh)
-    day_eur = abs(net_eur).quantize(Decimal("0.01"))
-    return tuple(points), day_mwh, day_eur
 
 
 class CubeClient:
@@ -436,8 +409,8 @@ class CubeMetricsProvider:
             if self._eur_per_mwh and self._eur_per_mwh > 0:
                 ytd_eur = headline_waste_eur(ytd_mwh, self._eur_per_mwh)
         else:
-            hourly, day_mwh, day_eur = _hourly_points_from_slots(
-                day, qh_mwh, qh_eur_slots, self._tz, self._qh_slots
+            hourly, day_mwh, day_eur = qh_mwh_eur_to_hourly_points(
+                day, qh_mwh, qh_eur_slots, self._tz, n_slots=self._qh_slots
             )
 
         n = len(hourly)

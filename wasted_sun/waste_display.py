@@ -23,6 +23,11 @@ def headline_waste_eur(net_mwh: Decimal, eur_per_mwh: Decimal | None) -> Decimal
     return (headline_waste_mwh(net_mwh) * rate).quantize(Decimal("0.01"))
 
 
+def headline_waste_eur_from_net(net_eur: Decimal) -> Decimal:
+    """Headline € from Cube PriceEspEurMwh rollups (signed net, display magnitude)."""
+    return abs(net_eur).quantize(Decimal("0.01"))
+
+
 def mean_hourly_waste_from_headline(
     headline_mwh: Decimal,
     headline_eur: Decimal,
